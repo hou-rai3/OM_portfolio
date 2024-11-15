@@ -240,9 +240,9 @@ header h1 {
 
 .chige_name_Jp {
     /*fontの記述は上部font_JK*/
-    padding-top: 6vw;
+    padding-top: 3vw;
     padding-right: 0.1vw;
-    width: 5vw;
+    width: 10vw;
 }
 
 .chige_name_En {
