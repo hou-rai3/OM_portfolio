@@ -569,6 +569,30 @@ header h1 {
     background-image: url('./07_OM_Portfolio_files/hack.png');
 }
 
+.pv {
+    background-image: url('./07_OM_Portfolio_files/pv.png');
+}
+
+.pv2 {
+    background-image: url('./07_OM_Portfolio_files/pv2.png');
+}
+
+.pv3 {
+    background-image: url('./07_OM_Portfolio_files/pv3.png');
+}
+
+.pv4 {
+    background-image: url('./07_OM_Portfolio_files/pv4.png');
+}
+
+.pv5 {
+    background-image: url('./07_OM_Portfolio_files/pv5.png');
+}
+
+.pv6 {
+    background-image: url('./07_OM_Portfolio_files/pv6.png');
+}
+
 .kosenfes-pamph {
     background-image: url('../images/kosenfes-pamph.jpg');
 }
