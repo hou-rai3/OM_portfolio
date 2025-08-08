@@ -1,486 +1,262 @@
-/* --- 基本設定 --- */
-:root {
-    --white: #FFFFFF;
-    --dark: #000;
-    --light-gray: #dddddd;
-    --pale-gray: #eaeaea;
-    --dark-green: #0f0f0f;
-    --accent: #9547bf;
-    --black-alpha: rgba(255, 255, 255, 0.7);
-    --main-text: #000000;
-}
 
-html {
-    width: 100%;
-    font-size: 62.5%;
+/* ====== Modern Portfolio CSS (2025) ====== */
+
+ :root {
+    --main-bg: #fff;
+    --section-bg: #111;
+    --accent: #111;
+    --text: #fff;
+    --text-sub: #bbb;
+    --nav-bg: rgba(0,0,0,0.95);
+    --nav-hover: #222;
+    --career-border: #fff;
+    --career-date: #fff;
+    --career-desc: #fff;
 }
 
 body {
     margin: 0;
-    background: var(--light-gray);
-    width: 100%;
-    font-family: "M PLUS 1p", sans-serif;
-    font-weight: 400;
+    font-family: 'Montserrat', 'M PLUS 1p', sans-serif;
+    background: var(--main-bg);
+    color: #111;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-.container {
-    height: 100%;
-    width: 100%;
-    margin: auto;
+/* ===== Hero Section ===== */
+.hero {
     position: relative;
-}
-
-a {
-    cursor: pointer;
-    position: relative;
-    transition: .5s;
-    color: var(--main-text);
-    text-decoration: none;
-}
-
-a::after {
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    content: '';
-    width: 0;
-    height: 2px;
-    background-color: var(--accent);
-    transition: .3s;
-}
-
-a:hover::after {
-    width: 100%;
-}
-
-p {
-    margin: 1rem 0;
-}
-
-/* --- ヘッダー --- */
-header {
     width: 100vw;
     height: 100vh;
-    background-color: var(--dark-green);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
-
-.heading-logo {
-    width: 24vw;
-    min-width: 200px;
-}
-
-/* --- ナビゲーション --- */
-#global_nav {
-    position: fixed;
-    top: 0;
-    right: -50px;
-    width: calc(13vw + 200px);
+#bg-video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
     height: 100vh;
-    background: var(--black-alpha);
-    z-index: 3;
-    transform: translateX(calc(13vw + 150px + 5vw));
-    transition: all 0.4s cubic-bezier(0.17, 1.315, 0.6, 1.00499);
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.5) blur(1px);
 }
-#global_nav.motion {
-    transform: translateX(0);
-}
-#global_nav a {
-    color: var(--dark);
-}
-#global_nav a:visited {
-    color: var(--white);
-}
-#global_nav::before {
-    position: absolute;
-    content: "";
-    width: 0;
-    height: 0;
-    top: 0;
-    border-right: 10vw solid var(--black-alpha);
-    border-top: 100vh solid transparent;
-    left: -10vw;
-}
-.global_nav_item_top {
-    padding-top: 20vh;
-}
-.global_nav_item {
-    width: 6vw;
-    padding: 2vw;
-    margin: 1.2vh 0 0 4vw;
-    font-family: 'Coves', sans-serif;
-    font-weight: 700;
-    font-size: 2.8rem;
-    color: white;
-}
-
-/* --- セクション共通 --- */
-.section_title {
-    position: absolute;
-    top: 9vh;
-    left: 40px;
-    height: 20vh;
-}
-.global_section_bar {
-    position: fixed;
-    top: 10vh;
-    left: 0;
-    background: var(--dark-green);
-    width: 18px;
-    height: 14vh;
-    z-index: 1;
-}
-
-/* --- About Section --- */
-.about-slanting-background-top,
-.about-slanting-background-bottom {
-    content: "";
-    position: absolute;
-    right: 0;
-    border-right: 100vw solid var(--dark-green);
-    z-index: -1;
-}
-.about-slanting-background-top {
-    top: 0;
-    border-bottom: 15vh solid transparent;
-}
-.about-slanting-background-bottom {
-    bottom: -20vw;
-    border-top: 40vw solid transparent;
-}
-.about_wrapper {
-    margin: auto;
-    padding-top: calc(48vh - 22vw / 2);
-    width: 70vw;
-    display: flex;
+.hero-content {
     position: relative;
-}
-.chige_icon {
-    position: absolute;
-    width: 22vw;
-    height: 22vw;
-    border-radius: 100%;
-    background-size: cover;
-    background-position: center;
-    z-index: 1;
-}
-.chige_name_circle {
-    position: absolute;
-    top: calc(48vh - 16vw / 2);
-    left: 19.5vw;
-    color: white;
+    z-index: 2;
     text-align: center;
-    width: 17vw;
-    height: 17vw;
-    border-radius: 100%;
-    background: var(--dark-green);
 }
-.chige_name_Jp {
-    padding-top: 3vw;
-    padding-right: 0.1vw;
-    width: 10vw;
-}
-.chige_name_En {
-    padding-top: 1vw;
-    font-family: 'Coves', sans-serif;
+.hero-content h1 {
+    font-size: 4rem;
     font-weight: 700;
-    font-size: 1.3vw;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+    letter-spacing: 0.1em;
+    text-shadow: 0 4px 24px #000a;
 }
-.about_my_name {
-    margin-left: calc(16vw + 22vw);
-    padding: 3vw 0;
-}
-.school_info {
-    font-family: 'Coves', sans-serif;
-    font-weight: 700;
-    font-size: 1.2vw;
-    padding-top: 5vw;
-}
-.uchida_keita {
-    font-family: 'Coves', sans-serif;
-    font-weight: 700;
-    font-size: 3vw;
-}
-.skill_keywords {
-    padding-top: 10px;
-}
-.skill_keywords span {
-    display: inline-block;
-    background-color: var(--accent);
-    padding: 6px 10px;
-    border-radius: 6px;
-    color: var(--light-gray);
-    margin: 2px 3px 2px 0;
-    font-size: 0.7vw;
-}
-
-/* --- Skill Section --- */
-.skill_background_box {
-    position: absolute;
-    width: 100%;
-    height: calc(100vh - 20vw);
-    top: 20vw;
-    background: var(--dark-green);
-    z-index: -1;
-}
-.about_free_comment_box {
-    width: 75vw;
-    margin: auto;
-    padding-top: 20vh;
-    padding-left: 5vw;
-    color: white;
-}
-.about_skill {
-    font-family: 'Coves', sans-serif;
-    font-size: 3vw;
-    letter-spacing: 0.15rem;
-    text-align: right;
-    position: relative;
-}
-.about_skill::before {
-    content: "";
-    position: absolute;
-    top: -2.5vw;
-    right: 0;
-    width: 50%;
-    height: 1px;
-    background: var(--light-gray);
-}
-.about_skill_ex {
-    font-family: 'Coves', sans-serif;
-    font-size: 2vw;
-    text-align: right;
-}
-.skill_list {
-    margin: 0 auto;
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-}
-.skills {
-    width: 20%;
-    margin: 10px 2%;
-    vertical-align: top;
-}
-.skills img {
-    max-width: 100%;
-    height: auto;
-}
-
-/* --- History Section --- */
-.history_time_line {
-    position: absolute;
-    width: 3px;
-    height: 100%;
-    background: var(--dark-green);
-    top: 0;
-    left: calc(75vw + 5vw);
-}
-.history_wrapper {
-    width: 100%;
-    height: calc(100vh - 14vh);
-    padding: 7vh 0;
-}
-.history_object {
-    width: 100%;
-    position: relative;
-    margin-bottom: 2vh;
-}
-.history_text {
-    display: inline-grid;
-    padding: 1.5vh 0;
-    width: 75vw;
-    font-size: 1.1vw;
-    text-align: right;
-}
-.history_text_box {
-    display: inline-grid;
-    width: 30vw;
-    padding: 2vh 0;
-    margin-left: calc(75vw - 30vw);
-    background: var(--dark-green);
-    font-size: 1.1vw;
-    text-align: center;
-    color: var(--white);
-    border-radius: 1.5vw;
-    position: relative;
-}
-.history_text_box a {
-    color: var(--white);
-}
-.history_text_box::after {
-    position: absolute;
-    content: "";
-    top: 50%;
-    transform: translateY(-50%);
-    left: 100%;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 1vh 0 1vh 1.732vh;
-    border-color: transparent transparent transparent var(--dark-green);
-}
-.history_circle_box {
-    display: inline-grid;
-    width: 3vh;
-    vertical-align: middle;
-    padding-left: calc(5vw - (3vh / 2) - 1.5px);
-}
-.history_circle {
-    width: 3vh;
-    height: 3vh;
-    border-radius: 100%;
-    background: var(--dark-green);
-}
-.history_date {
-    display: inline-grid;
-    padding-left: 1vw;
-    width: 7vw;
-    font-size: 1vw;
-    vertical-align: middle;
-}
-
-/* --- Works Section (REFACTORED) --- */
-.works_background {
-    width: 100%;
-    height: 100%;
-    background-color: var(--pale-gray);
-}
-
-.works-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    width: 80%;
-    margin: 0 auto;
-    padding: 15vh 0;
-}
-
-.work-card {
-    background-color: var(--white);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.work-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-.work-card::after { /* リンクの下線を無効化 */
-    display: none;
-}
-
-.work-card-image-wrapper {
-    width: 100%;
-    padding-top: 75%; /* アスペクト比 4:3 */
-    position: relative;
-    overflow: hidden;
-}
-
-.work-card img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 画像がコンテナに合わせて調整される */
-    transition: transform 0.3s ease;
-}
-
-.work-card:hover img {
-    transform: scale(1.05);
-}
-
-.work-card-text {
-    padding: 1.5rem;
-}
-
-.work-card-text h3 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 0.8rem;
-}
-
-.work-card-text p {
-    font-size: 1.3rem;
-    line-height: 1.6;
+.hero-content p {
+    font-size: 1.5rem;
+    color: var(--text-sub);
     margin: 0;
 }
 
-/* --- Contact Section --- */
-.contact_wrapper {
-    padding-top: 25vh;
-    width: 80vw;
-    margin: auto;
+/* ===== Navigation ===== */
+.main-nav {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    background: var(--nav-bg);
+    z-index: 10;
+    box-shadow: 0 2px 16px #0003;
+}
+.main-nav ul {
     display: flex;
     justify-content: center;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 1.2rem 0;
+    list-style: none;
+}
+.main-nav li {
+    display: inline-block;
+}
+.main-nav a {
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.main-nav a:hover {
+    background: var(--nav-hover);
+}
+
+/* ===== Section Base ===== */
+ .section {
+    min-height: 100vh;
+    padding: 8rem 0 4rem 0;
+    background: var(--section-bg);
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5rem;
+    justify-content: center;
+    color: var(--text);
 }
-.contact_icon_box::after {
-    display: none;
+.section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    letter-spacing: 0.08em;
 }
-.contact_icon {
-    width: 6vw;
-    min-width: 60px;
-    transition: transform 0.2s ease-in-out;
+.about h2, .works h2 {
+    color: #111;
 }
-.contact_icon:hover {
-    transform: scale(1.1);
+.career h2, .contact h2, .hero h2 {
+    color: #fff;
 }
-.contact_icon_text {
+/* ===== Career Section ===== */
+.career {
+    background: #111;
+    color: #fff;
     text-align: center;
-    font-size: 1.6rem;
-    margin-top: 1rem;
+}
+.career-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 2rem;
+}
+.career-item {
+    border-left: 4px solid var(--career-border);
+    padding: 1.2rem 2rem;
+    margin-left: 1.5rem;
+    position: relative;
+    min-width: 260px;
+    max-width: 400px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 0.7rem;
+    box-shadow: 0 2px 12px #0002;
+}
+.career-item::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background: var(--career-border);
+    border-radius: 50%;
+    border: 2px solid #111;
+}
+.career-date {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--career-date);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+.career-desc {
+    color: var(--career-desc);
+    font-size: 1.1rem;
 }
 
-/* --- レスポンシブ対応 (スマートフォン) --- */
-@media screen and (max-width: 768px) {
-    /* (元のスマホ用CSSをベースに調整) */
-    .heading-logo { width: 40vw; }
-    #global_nav { display: none; /* スマホではハンバーガーメニューにするのが一般的ですが、一旦非表示にします */ }
-    .global_section_bar { display: none; }
-    
-    .section_title { height: 15vh; top: 8vh; }
-    
-    .about_wrapper { display: block; padding-top: 25vh; width: 90vw; }
-    .chige_icon { width: 38vw; height: 38vw; position: static; margin: 0 auto; }
-    .chige_name_circle { display: none; /* スマホでは簡略化 */ }
-    .about_my_name { margin-left: 0; text-align: center; padding: 2rem 0; }
-    .school_info { font-size: 3.5vw; padding-top: 2rem; }
-    .uchida_keita { font-size: 8vw; }
-    .skill_keywords span { font-size: 2.5vw; }
-
-    .history_wrapper { width: 88vw; padding: 20vh 0 8vh; }
-    .history_time_line { left: 1rem; }
-    .history_object { display: flex; flex-direction: column; align-items: flex-start; margin-left: 4rem; }
-    .history_text, .history_text_box { width: 100%; text-align: left; margin-left: 0; padding: 1rem 0; font-size: 1.4rem; }
-    .history_text_box { padding: 1.5rem; }
-    .history_date { width: auto; padding-left: 0; font-size: 1.2rem; color: #666; order: -1; }
-    .history_circle_box { position: absolute; left: -3.5rem; top: 1.5rem; }
-    .history_text_box::after { display: none; }
-
-    .works-grid {
-        grid-template-columns: 1fr; /* スマホでは1列に */
-        width: 90%;
-        padding: 20vh 0 10vh 0;
-    }
-    
-    .contact_wrapper {
-        flex-direction: column;
-        padding-top: 20vh;
-        gap: 3rem;
-    }
+/* ===== About Section ===== */
+.about {
+    background: #fff;
+    color: #111;
+    text-align: center;
+}
+.about p {
+    font-size: 1.3rem;
+    color: #444;
 }
 
-/* --- ナビゲーション (追記) --- */
-.global_nav_item a.active::after,
-.global_nav_item a:hover::after {
-    width: 100%; /* ホバー時とアクティブ時に下線を表示 */
+/* ===== Works Section ===== */
+.works {
+    background: #fff;
+    color: #111;
+}
+.work-list {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.work-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #111;
+    color: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem 2rem 1.2rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 0 2px 12px #0002;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    width: 240px;
+    min-height: 320px;
+    position: relative;
+}
+.work-item:hover {
+    transform: translateY(-6px) scale(1.04);
+    box-shadow: 0 8px 32px #0004;
+    background: #222;
+}
+.work-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 0.7rem;
+    margin-bottom: 1.2rem;
+    background: #222;
+}
+.work-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.work-desc {
+    font-size: 1rem;
+    color: #bbb;
+    text-align: center;
+}
+
+/* ===== Contact Section ===== */
+.contact {
+    background: #111;
+    color: #fff;
+    text-align: center;
+}
+.contact a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+footer {
+    text-align: center;
+    color: #bbb;
+    background: #111;
+    padding: 2rem 0 1rem 0;
+    font-size: 1rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+    .hero-content h1 { font-size: 2.5rem; }
+    .section h2 { font-size: 1.7rem; }
+    .work-item { padding: 1.2rem 1.5rem; font-size: 1rem; }
+}
+@media (max-width: 600px) {
+    .main-nav ul { gap: 1rem; }
+    .hero-content h1 { font-size: 1.5rem; }
+    .section { padding: 5rem 0 2rem 0; }
+    .work-list { flex-direction: column; gap: 1rem; }
 }

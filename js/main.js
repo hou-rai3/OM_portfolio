@@ -1,47 +1,79 @@
-$(function() {
-  // Scrollifyライブラリを初期化
-  $.scrollify({
-    section : ".container",
-    scrollSpeed: 1000,
-    easing: "easeOutExpo",
-    scrollbars: true,
-    setHeights: true,
-    updateHash: true,
-    touchScroll: true,
-    
-    // スクロール前に実行される関数
-    before: function(i, panels) {
-      // ▼▼▼ 修正部分 ▼▼▼
-      // アニメーション中の意図しない連続スクロールを防ぐため、一時的にスクロールを無効化する
-      $.scrollify.disable();
 
-      // ナビゲーションのハイライト処理
-      var ref = panels[i].attr("data-section-name");
-      $(".global_nav_item a").removeClass("active");
-      $('.global_nav_item a[href="#' + ref + '"]').addClass("active");
+// ===== GSAP + ScrollTrigger Animation Sample =====
+window.addEventListener('DOMContentLoaded', () => {
+  // ヒーローテキストをフェードイン
+  gsap.from('.hero-content h1', { opacity: 0, y: 60, duration: 1.2, ease: 'power3.out' });
+  gsap.from('.hero-content p', { opacity: 0, y: 40, duration: 1, delay: 0.5, ease: 'power2.out' });
+
+  // Aboutセクションをスクロールでアニメーション
+  gsap.from('.about h2', {
+    scrollTrigger: {
+      trigger: '.about',
+      start: 'top 80%',
     },
-    
-    // ▼▼▼ 修正部分 ▼▼▼
-    // スクロール完了後に実行される関数
-    after: function() {
-      // スクロール機能を再度有効化する
-      $.scrollify.enable();
+    opacity: 0,
+    y: 40,
+    duration: 1,
+    ease: 'power2.out'
+  });
+  gsap.from('.about p', {
+    scrollTrigger: {
+      trigger: '.about',
+      start: 'top 75%',
     },
-    
-    // ページ読み込み完了時に実行される関数
-    afterRender: function() {
-      // 最初のセクションにアクティブクラスを付与
-      $('.global_nav_item a[href="#header"]').addClass("active");
-      
-      // ▼▼▼ 修正部分 ▼▼▼
-      // 読み込み完了後、スクロールを有効化する（初期化時に無効になっている場合があるため）
-      $.scrollify.enable();
-    }
+    opacity: 0,
+    y: 30,
+    duration: 1,
+    delay: 0.2,
+    ease: 'power2.out'
   });
 
-  // ナビゲーションリンクをクリックした時に、該当セクションへ移動する
-  $(".global_nav_item a").on("click", function(e) {
-    e.preventDefault();
-    $.scrollify.move($(this).attr("href"));
+  // Worksセクションの各アイテムを順にアニメーション
+  gsap.utils.toArray('.work-item').forEach((item, i) => {
+    gsap.from(item, {
+      scrollTrigger: {
+        trigger: item,
+        start: 'top 85%',
+      },
+      opacity: 0,
+      y: 40,
+      duration: 0.7,
+      delay: i * 0.15,
+      ease: 'power2.out'
+    });
+  });
+
+  // Contactセクション
+  gsap.from('.contact h2', {
+    scrollTrigger: {
+      trigger: '.contact',
+      start: 'top 80%',
+    },
+    opacity: 0,
+    y: 40,
+    duration: 1,
+    ease: 'power2.out'
+  });
+  gsap.from('.contact p', {
+    scrollTrigger: {
+      trigger: '.contact',
+      start: 'top 75%',
+    },
+    opacity: 0,
+    y: 30,
+    duration: 1,
+    delay: 0.2,
+    ease: 'power2.out'
+  });
+
+  // ナビゲーションのスムーススクロール
+  document.querySelectorAll('.main-nav a').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        document.querySelector(href).scrollIntoView({ behavior: 'smooth' });
+      }
+    });
   });
 });
