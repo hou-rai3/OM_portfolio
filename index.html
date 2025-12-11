@@ -331,7 +331,7 @@
                     <li><a href="#contact">COMMS</a></li>
                 </ul>
             </nav>
-            <div class="sys-status" style="font-size: 1rem;">BATT: 98%</div>
+            <div id="battery-display" class="sys-status" style="font-size: 1rem;">BATT: --%</div>
         </header>
 
         <aside class="hud-left">
@@ -384,7 +384,7 @@
             <p style="margin-top: 20px;">
                 2023年に大阪公立大学工業高等専門学校に入学。<br>
                 「ろぼっと倶楽部」所属のチームリーダー。<br>
-                NHK高専ロボコンでの全国優勝を至上命令（プライマリー・ミッション）とし、<br>
+                NHK高専ロボコンでの全国優勝を目標に<br>
                 日夜技術研鑽と戦略構築に従事している。
             </p>
         </section>
@@ -427,19 +427,44 @@
             <h2>ARSENAL (Works)</h2>
             <div class="works-grid">
                 <a class="work-card" href="https://github.com/hou-rai3/PG1_07_task4.git" target="_blank">
-                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=SLIME+BATTLE" alt="VS Slime">
+                    <img src="images/slime.png" alt="VS Slime">
                     <h3 style="margin: 10px 0 5px 0;">VS 最強スライム</h3>
                     <p style="font-size: 0.9rem; margin: 0;">高難易度バトルシミュレーション</p>
                 </a>
                 <a class="work-card" href="https://github.com/hou-rai3/Pose_Estimation" target="_blank">
-                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=POSE+ESTIMATION" alt="Pose Estimation">
+                    <img src="images/kousensai4.png" alt="Steering Sim">
                     <h3 style="margin: 10px 0 5px 0;">人体認識システム</h3>
                     <p style="font-size: 0.9rem; margin: 0;">機械学習による動作検知</p>
                 </a>
                 <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=STEERING+SIM" alt="Steering Sim">
+                    <img src="images/steer.png" alt="Steering Sim">
                     <h3 style="margin: 10px 0 5px 0;">4輪独立ステアシミュ</h3>
                     <p style="font-size: 0.9rem; margin: 0;">ロボット足回りの挙動計算</p>
+                </a>
+                 <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="images/hing.png" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">関西春ロボコン2025</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">ロボット制御</p>
+                </a>
+                 <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="images/himari.png" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">高専ロボコン2024</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">ロボット制御</p>
+                </a>
+                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="images/greathing.png" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">関西春ロボコン2025</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">チームリーダー</p>
+                </a>
+                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="images/isana.png" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">高専ロボコン2025</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">チームリーダー</p>
+                </a>
+                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">DISCOロボコン2026</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">coming soon...</p>
                 </a>
             </div>
         </section>
@@ -475,6 +500,45 @@
                 ease: "power2.out"
             });
         });
+        const batteryDisplay = document.getElementById('battery-display');
+
+    // ブラウザがBattery APIに対応しているかチェック
+    if ('getBattery' in navigator) {
+        navigator.getBattery().then(function(battery) {
+            
+            // バッテリー情報を更新する関数
+            function updateBatteryUI() {
+                const level = Math.floor(battery.level * 100);
+                const isCharging = battery.charging;
+                
+                // 表示テキストの作成
+                let text = `BATT: ${level}%`;
+                if (isCharging) {
+                    text += ' [CHRG]'; // 充電中の表記
+                }
+                batteryDisplay.textContent = text;
+
+                // 演出: 20%以下で警告色（赤）、それ以外は通常色（シアン）
+                if (level <= 20 && !isCharging) {
+                    batteryDisplay.style.color = 'var(--hud-alert)';
+                    batteryDisplay.style.textShadow = '0 0 10px var(--hud-alert)';
+                } else {
+                    batteryDisplay.style.color = 'var(--hud-color)';
+                    batteryDisplay.style.textShadow = '0 0 5px var(--hud-color)';
+                }
+            }
+
+            // 初回実行
+            updateBatteryUI();
+
+            // イベントリスナー: 残量変化や充電状態の変化を監視
+            battery.addEventListener('levelchange', updateBatteryUI);
+            battery.addEventListener('chargingchange', updateBatteryUI);
+        });
+    } else {
+        // 非対応ブラウザ（iPhoneなど）の場合のフォールバック表示
+        batteryDisplay.textContent = "BATT: N/A";
+    }
     </script>
 </body>
 </html>
