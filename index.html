@@ -1,108 +1,480 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Portfolio</title>
-    <meta name="description" content="最先端の技術とデザインで魅せるポートフォリオ">
-    <link rel="stylesheet" href="./css/reset.css">
-    <link rel="stylesheet" href="./css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
-    <!-- GSAP & ScrollTrigger CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <title>PILOT: MINATO // SYSTEM ONLINE</title>
+    <meta name="description" content="Minato Portfolio - Mech Cockpit Interface">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ====== SETTINGS & RESET ====== */
+        :root {
+            --hud-color: #00f0ff;      /* シアン色の発光色 */
+            --hud-bg: rgba(10, 20, 30, 0.85); /* 濃紺の半透明背景 */
+            --hud-alert: #ff3333;      /* 警告色 */
+            --frame-color: #1a1a1a;    /* 機体フレーム色 */
+            --text-main: #e0faff;
+            --scan-line: rgba(0, 240, 255, 0.03);
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #000;
+            color: var(--text-main);
+            overflow-x: hidden;
+            /* スクロールバーのデザイン */
+            scrollbar-width: thin;
+            scrollbar-color: var(--hud-color) #000;
+        }
+
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: #000; }
+        body::-webkit-scrollbar-thumb { background: var(--hud-color); border-radius: 4px; }
+
+        /* ====== BACKGROUND (WORLD VIEW) ====== */
+        #bg-video {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.4) contrast(1.2) sepia(0.2) hue-rotate(180deg);
+            /* 雨の動画がない場合のフォールバック画像（黒背景） */
+            background: #050505; 
+        }
+
+        /* ====== COCKPIT HUD OVERLAY (Fixed Interface) ====== */
+        .cockpit-ui {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; /* コンテンツのクリックを邪魔しないようにする */
+            z-index: 100;
+        }
+
+        /* 画面上のスキャンラインノイズ */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, var(--scan-line) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        /* --- HUD PANELS --- */
+        
+        /* TOP BAR: Header & Compass */
+        .hud-top {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60px;
+            background: var(--hud-bg);
+            border-bottom: 2px solid var(--hud-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            /* 下の両角を切り落とす */
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            box-shadow: 0 0 15px var(--hud-color);
+            pointer-events: auto;
+        }
+        .sys-status { font-weight: 700; font-size: 1.2rem; letter-spacing: 2px; color: var(--hud-color); text-shadow: 0 0 5px var(--hud-color); }
+        
+        /* NAVIGATION (Top Center) */
+        .hud-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0; padding: 0;
+        }
+        .hud-nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: 0.3s;
+            position: relative;
+        }
+        .hud-nav a:hover {
+            color: var(--hud-color);
+            text-shadow: 0 0 8px var(--hud-color);
+        }
+        /* 現在地マーカー */
+        .hud-nav a::after {
+            content: '';
+            position: absolute;
+            width: 0%; height: 2px;
+            bottom: -5px; left: 0;
+            background: var(--hud-color);
+            transition: 0.3s;
+        }
+        .hud-nav a:hover::after { width: 100%; }
+
+        /* LEFT PANEL: Status / Pilot Data */
+        .hud-left {
+            position: absolute;
+            top: 20%; left: 0;
+            width: 150px;
+            height: 60%;
+            border-right: 2px solid var(--hud-color);
+            background: linear-gradient(to right, #000 0%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 10px;
+            /* 台形変形 */
+            transform: perspective(500px) rotateY(10deg);
+            transform-origin: left;
+        }
+        .status-bar {
+            margin-bottom: 20px;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .label { font-size: 0.8rem; color: var(--hud-color); display: block; }
+        .bar-frame {
+            width: 100%; height: 10px;
+            border: 1px solid var(--text-main);
+            margin-top: 5px;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            background: var(--hud-color);
+            box-shadow: 0 0 10px var(--hud-color);
+            animation: pulse 2s infinite;
+        }
+
+        /* RIGHT PANEL: Radar / Info */
+        .hud-right {
+            position: absolute;
+            top: 20%; right: 0;
+            width: 150px;
+            height: 60%;
+            border-left: 2px solid var(--hud-color);
+            background: linear-gradient(to left, #000 0%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* 台形変形 */
+            transform: perspective(500px) rotateY(-10deg);
+            transform-origin: right;
+        }
+        .radar-circle {
+            width: 100px; height: 100px;
+            border: 2px solid var(--hud-color);
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle, transparent 20%, rgba(0, 240, 255, 0.1) 80%);
+            box-shadow: inset 0 0 10px var(--hud-color);
+        }
+        .radar-scan {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50%; height: 2px;
+            background: var(--hud-color);
+            transform-origin: 0 0;
+            animation: radar-spin 3s linear infinite;
+        }
+
+        /* BOTTOM PANEL: Weapon/Works Summary */
+        .hud-bottom {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 50px;
+        }
+        /* コックピットの斜めの柱（装飾） */
+        .pillar {
+            width: 200px; height: 100px;
+            background: var(--frame-color);
+            border-top: 2px solid #555;
+            position: relative;
+        }
+        .pillar.left {
+            clip-path: polygon(0 0, 70% 0, 100% 100%, 0% 100%);
+            border-right: 2px solid var(--hud-color);
+        }
+        .pillar.right {
+            clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+            border-left: 2px solid var(--hud-color);
+        }
+
+        /* ====== MAIN SCROLL CONTENT ====== */
+        /* コンテンツは中央の「窓」の中に表示されるように見せる */
+        .content-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 150px 20px 150px 20px; /* HUDに被らないよう余白確保 */
+            text-align: center;
+        }
+
+        /* 各セクションのデザイン（ホログラムパネル風） */
+        .holo-panel {
+            background: rgba(0, 15, 20, 0.7);
+            border: 1px solid var(--hud-color);
+            margin-bottom: 80px;
+            padding: 40px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+        /* パネルの四隅の装飾 */
+        .holo-panel::before {
+            content: ''; position: absolute; top: -1px; left: -1px;
+            width: 20px; height: 20px;
+            border-top: 3px solid var(--hud-color);
+            border-left: 3px solid var(--hud-color);
+        }
+        .holo-panel::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px;
+            width: 20px; height: 20px;
+            border-bottom: 3px solid var(--hud-color);
+            border-right: 3px solid var(--hud-color);
+        }
+
+        h1 { font-size: 4rem; margin: 0; text-transform: uppercase; text-shadow: 0 0 10px var(--hud-color); }
+        h2 { 
+            font-size: 2.5rem; 
+            border-bottom: 1px solid var(--hud-color); 
+            display: inline-block; 
+            padding: 0 20px;
+            margin-bottom: 30px;
+            color: var(--hud-color);
+        }
+        p { font-size: 1.2rem; line-height: 1.8; color: #ccc; }
+
+        /* Timeline (Career) */
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 15px 0;
+            text-align: left;
+        }
+        .timeline-date { color: var(--hud-color); font-weight: bold; width: 120px; flex-shrink: 0;}
+
+        /* Works Grid */
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .work-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            padding: 15px;
+            transition: 0.3s;
+            text-decoration: none;
+            color: #fff;
+            display: block;
+        }
+        .work-card:hover {
+            border-color: var(--hud-color);
+            background: rgba(0, 240, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        .work-card img { width: 100%; height: 140px; object-fit: cover; filter: grayscale(80%); transition: 0.3s;}
+        .work-card:hover img { filter: grayscale(0%); }
+
+        /* Footer */
+        footer { margin-top: 50px; color: #666; font-size: 0.9rem; }
+
+        /* ====== ANIMATIONS ====== */
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hud-left, .hud-right { display: none; } /* スマホでは左右パネルを消す */
+            .hud-top { width: 100%; padding: 0 10px; }
+            .pillar { width: 100px; }
+            h1 { font-size: 2.5rem; }
+        }
+
+    </style>
 </head>
 <body>
-    <div id="hero" class="section hero">
-        <video autoplay muted loop id="bg-video">
-            <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
-        </video>
-        <div class="hero-content">
-            <h1>Welcome to My Portfolio</h1>
-            <p>Minato</p>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
+    </video>
+
+    <div class="scanlines"></div>
+
+    <div class="cockpit-ui">
+        
+        <header class="hud-top">
+            <div class="sys-status">SYS: ONLINE</div>
+            <nav class="hud-nav">
+                <ul>
+                    <li><a href="#about">PILOT</a></li>
+                    <li><a href="#career">LOG</a></li>
+                    <li><a href="#works">ARMORY</a></li>
+                    <li><a href="#contact">COMMS</a></li>
+                </ul>
+            </nav>
+            <div class="sys-status" style="font-size: 1rem;">BATT: 98%</div>
+        </header>
+
+        <aside class="hud-left">
+            <div class="status-bar">
+                <span class="label">PYTHON</span>
+                <div class="bar-frame"><div class="bar-fill" style="width: 90%;"></div></div>
+            </div>
+            <div class="status-bar">
+                <span class="label">C++ / EMBEDDED</span>
+                <div class="bar-frame"><div class="bar-fill" style="width: 75%;"></div></div>
+            </div>
+            <div class="status-bar">
+                <span class="label">ROBOTICS</span>
+                <div class="bar-frame"><div class="bar-fill" style="width: 85%;"></div></div>
+            </div>
+            <div class="status-bar">
+                <span class="label">MENTAL</span>
+                <div class="bar-frame"><div class="bar-fill" style="width: 100%; background: #ffaa00;"></div></div>
+            </div>
+        </aside>
+
+        <aside class="hud-right">
+            <div class="radar-circle">
+                <div class="radar-scan"></div>
+            </div>
+            <div style="margin-top: 20px; text-align: left; width: 100%; padding-left: 20px;">
+                <span class="label">ENV: RAIN</span>
+                <span class="label">LOC: OSAKA</span>
+                <span class="label">OBJ: WIN</span>
+            </div>
+        </aside>
+
+        <div class="hud-bottom">
+            <div class="pillar left"></div>
+            <div class="pillar right"></div>
         </div>
     </div>
-        <nav class="main-nav">
-            <ul>
-                <li><a href="#hero">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#career">Career</a></li>
-                <li><a href="#works">Works</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-        <div id="about" class="section about">
-            <h2>About Me</h2>
-            <p>Name:岡部昊斗/Okabe Minato</p>
-            <p>2023年に大阪公立大学工業高等専門学校に入学し、ろぼっと倶楽部に所属しています。<br>
-                2024年度での高専ロボコン全国優勝を経て<br>
-                2025年度でも優勝し、大阪公大高専の全国大会三連覇を目標に日々活動しています。</p>
 
+    <main class="content-container">
+        
+        <section id="hero" style="height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+            <p style="color: var(--hud-color); letter-spacing: 5px;">WELCOME TO ARCHIVE</p>
+            <h1>MINATO<br>PORTFOLIO</h1>
+            <p>OSAKA METROPOLITAN UNIV. COLLEGE OF TECHNOLOGY<br>ROBOT CLUB TEAM LEADER</p>
+        </section>
 
-        </div>
-        <div id="career" class="section career">
-            <h2>Career</h2>
-            <div class="career-timeline">
-                <div class="career-item">
-                    <span class="career-date">2023/04</span>
-                    <span class="career-desc">大阪公立大学工業高等専門学校 入学</span>
+        <section id="about" class="holo-panel">
+            <h2>PILOT DATA (About)</h2>
+            <p><strong>Name:</strong> 岡部昊斗 / Okabe Minato</p>
+            <p style="margin-top: 20px;">
+                2023年に大阪公立大学工業高等専門学校に入学。<br>
+                「ろぼっと倶楽部」所属のチームリーダー。<br>
+                NHK高専ロボコンでの全国優勝を至上命令（プライマリー・ミッション）とし、<br>
+                日夜技術研鑽と戦略構築に従事している。
+            </p>
+        </section>
+
+        <section id="career" class="holo-panel">
+            <h2>MISSION LOG (Career)</h2>
+            <div class="career-list">
+                <div class="timeline-item">
+                    <span class="timeline-date">2023/04</span>
+                    <span>大阪公立大学工業高等専門学校 入学</span>
                 </div>
-                <div class="career-item">
-                    <span class="career-date">2023/12</span>
-                    <span class="career-desc">第8回廃炉創造ロボコン出場・協賛企業特別賞受賞</span>
+                <div class="timeline-item">
+                    <span class="timeline-date">2023/12</span>
+                    <span>廃炉創造ロボコン 協賛企業特別賞 受賞</span>
                 </div>
-                <div class="career-item">
-                    <span class="career-date">2024/03</span>
-                    <span class="career-desc">関西春ロボコン出場</span>
+                <div class="timeline-item">
+                    <span class="timeline-date">2024/03</span>
+                    <span>関西春ロボコン2024 出場</span>
                 </div>
-                <div class="career-item">
-                    <span class="career-date">2024/10</span>
-                    <span class="career-desc">高専ロボコン2024近畿地区大会準優勝</span>
+                <div class="timeline-item">
+                    <span class="timeline-date">2024/10</span>
+                    <span>高専ロボコン2024 近畿地区大会 準優勝</span>
                 </div>
-                <div class="career-item">
-                    <span class="career-date">2024/11</span>
-                    <span class="career-desc">高専ロボコン2024全国大会優勝</span>
+                <div class="timeline-item" style="border-left: 3px solid var(--hud-alert); padding-left: 10px;">
+                    <span class="timeline-date" style="color: var(--hud-alert);">2024/11</span>
+                    <span style="color: #fff; font-weight: bold;">高専ロボコン2024 全国大会 優勝</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-date">2025/09</span>
+                    <span>高専ロボコン2025 地区大会敗退</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-date">NEXT...</span>
+                    <span>DISCOロボコン2026 出場予定</span>
                 </div>
             </div>
-        </div>
-            <div id="works" class="section works">
-                <h2>Works</h2>
-                <div class="work-list">
-                    <a class="work-item" href="https://github.com/hou-rai3/PG1_07_task4.git" target="_blank">
-                        <img src="images/slime.png" alt="VS 最強スライム" class="work-img">
-                        <div class="work-title">VS 最強スライム</div>
-                        <div class="work-desc">高難易度バトルシミュレーションゲーム</div>
-                    </a>
-                    <a class="work-item" href="https://github.com/hou-rai3/Pose_Estimation" target="_blank">
-                        <img src="images/pv.png" alt="Pose_Estimation" class="work-img">
-                        <div class="work-title">人体認識</div>
-                        <div class="work-desc">機械学習による人体の動きを検知</div>
-                    </a>
-                    <a class="work-item" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                        <img src="images/steer.png" alt="steering_simulator" class="work-img">
-                        <div class="work-title">steering_simulator</div>
-                        <div class="work-desc">4輪独立ステアの操作シミュレーター</div>
-                    </a>
-                </div>
+        </section>
+
+        <section id="works" class="holo-panel">
+            <h2>ARSENAL (Works)</h2>
+            <div class="works-grid">
+                <a class="work-card" href="https://github.com/hou-rai3/PG1_07_task4.git" target="_blank">
+                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=SLIME+BATTLE" alt="VS Slime">
+                    <h3 style="margin: 10px 0 5px 0;">VS 最強スライム</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">高難易度バトルシミュレーション</p>
+                </a>
+                <a class="work-card" href="https://github.com/hou-rai3/Pose_Estimation" target="_blank">
+                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=POSE+ESTIMATION" alt="Pose Estimation">
+                    <h3 style="margin: 10px 0 5px 0;">人体認識システム</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">機械学習による動作検知</p>
+                </a>
+                <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
+                    <img src="https://via.placeholder.com/300x150/003344/00f0ff?text=STEERING+SIM" alt="Steering Sim">
+                    <h3 style="margin: 10px 0 5px 0;">4輪独立ステアシミュ</h3>
+                    <p style="font-size: 0.9rem; margin: 0;">ロボット足回りの挙動計算</p>
+                </a>
             </div>
-        <div id="contact" class="section contact">
-            <h2>Contact</h2>
-            <p>ご連絡は <a href="mailto:om.repository@gmail.com">om.repository@gmail.com</a> まで</p>
-        </div>
+        </section>
+
+        <section id="contact" style="padding-bottom: 100px;">
+            <h2>COMMS LINK</h2>
+            <p>TRANSMISSION TARGET: <br>
+            <a href="mailto:om.repository@gmail.com" style="color: var(--hud-color); font-size: 1.5rem;">om.repository@gmail.com</a></p>
+        </section>
+        
         <footer>
-            <p>&copy; 2025 Minato Portfolio</p>
+            <p>&copy; 2025 MINATO ARCHIVES // ALL RIGHTS RESERVED.</p>
         </footer>
-        <script src="./js/main.js"></script>
-    </body>
-    </html>
 
-<!-- <a href="[ここに作品のリンク先URL]" class="work-card" target="_blank">
-    <div class="work-card-image-wrapper">
-        <img src="./images/[ここに画像ファイル名]" alt="[作品名]">
-    </div>
-    <div class="work-card-text">
-        <h3>[作品のタイトル] ([制作年月])</h3>
-        <p>[作品の短い説明文]</p>
-    </div>
-</a> -->
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+        // 簡単なスクロールアニメーション（各パネルがふわっと出現）
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.holo-panel').forEach(panel => {
+            gsap.from(panel, {
+                scrollTrigger: {
+                    trigger: panel,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+</html>
