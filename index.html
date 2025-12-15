@@ -3,542 +3,793 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PILOT: MINATO // SYSTEM ONLINE</title>
+    <title>MINATO // MECH INTERFACE</title>
     <meta name="description" content="Minato Portfolio - Mech Cockpit Interface">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- フォント読み込み -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* ====== SETTINGS & RESET ====== */
+        /* ====== CORE SETTINGS ====== */
         :root {
-            --hud-color: #00f0ff;      /* シアン色の発光色 */
-            --hud-bg: rgba(10, 20, 30, 0.85); /* 濃紺の半透明背景 */
-            --hud-alert: #ff3333;      /* 警告色 */
-            --frame-color: #1a1a1a;    /* 機体フレーム色 */
+            --primary-color: #00f0ff;       /* メイン発光色（シアン） */
+            --secondary-color: #00a8ff;     /* サブ発光色（濃い青） */
+            --alert-color: #ff3333;         /* 警告色 */
+            --bg-color: #050a10;            /* ベース背景色 */
+            --frame-color: #1a1f24;         /* 機体フレーム色 */
+            --frame-dark: #0f1215;          /* 機体フレーム影色 */
+            --glass-tint: rgba(0, 240, 255, 0.05); /* ガラスの着色 */
             --text-main: #e0faff;
-            --scan-line: rgba(0, 240, 255, 0.03);
+            
+            --ease-mech: cubic-bezier(0.2, 0.8, 0.2, 1); /* 機械的な動き */
         }
 
         * { box-sizing: border-box; }
         
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: 'Rajdhani', sans-serif;
             background-color: #000;
             color: var(--text-main);
-            overflow-x: hidden;
-            /* スクロールバーのデザイン */
-            scrollbar-width: thin;
-            scrollbar-color: var(--hud-color) #000;
+            overflow: hidden; /* 起動まではスクロール禁止 */
+            height: 100vh;
+            width: 100vw;
         }
 
-        body::-webkit-scrollbar { width: 8px; }
-        body::-webkit-scrollbar-track { background: #000; }
-        body::-webkit-scrollbar-thumb { background: var(--hud-color); border-radius: 4px; }
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); }
+        ::-webkit-scrollbar-corner { background: #000; }
 
-        /* ====== BACKGROUND (WORLD VIEW) ====== */
+        /* ====== BACKGROUND (WORLD) ====== */
         #bg-video {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             object-fit: cover;
             z-index: -1;
-            filter: brightness(0.4) contrast(1.2) sepia(0.2) hue-rotate(180deg);
-            /* 雨の動画がない場合のフォールバック画像（黒背景） */
-            background: #050505; 
+            filter: brightness(0.6) contrast(1.1) hue-rotate(180deg);
+            transition: filter 2s;
         }
 
-        /* ====== COCKPIT HUD OVERLAY (Fixed Interface) ====== */
-        .cockpit-ui {
+        /* ====== START SCREEN (Overlay) ====== */
+        #start-screen {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            pointer-events: none; /* コンテンツのクリックを邪魔しないようにする */
-            z-index: 100;
+            background: rgba(0,0,0,0.4);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+        
+        .start-btn {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        .start-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 30px var(--primary-color);
+            letter-spacing: 6px;
+        }
+        .start-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transition: 0.5s;
+        }
+        .start-btn:hover::before { left: 100%; }
+
+        /* ====== COCKPIT FRAMES (The Mech Parts) ====== */
+        .mech-frame {
+            position: fixed;
+            z-index: 500;
+            background: var(--frame-color);
+            box-shadow: inset 0 0 20px #000;
+            background-image: 
+                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(0,0,0,0.3) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
         }
 
-        /* 画面上のスキャンラインノイズ */
-        .scanlines {
+        /* 上部フレーム（ハッチ） */
+        .frame-top {
+            top: -50%;
+            left: 0; width: 100%; height: 8vh;
+            clip-path: polygon(0 0, 100% 0, 100% 60%, 80% 100%, 20% 100%, 0 60%);
+            border-bottom: 2px solid #333;
+        }
+        /* 下部フレーム（コンソール） */
+        .frame-bottom {
+            bottom: -50%;
+            left: 0; width: 100%; height: 12vh;
+            clip-path: polygon(0 100%, 100% 100%, 100% 30%, 85% 0, 15% 0, 0 30%);
+            border-top: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        /* 左サイドフレーム */
+        .frame-left {
+            top: 0; left: -50%;
+            width: 8vw; height: 100%;
+            clip-path: polygon(0 0, 100% 0, 60% 15%, 60% 85%, 100% 100%, 0 100%);
+            border-right: 2px solid #333;
+        }
+        /* 右サイドフレーム */
+        .frame-right {
+            top: 0; right: -50%;
+            width: 8vw; height: 100%;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 85%, 40% 15%);
+            border-left: 2px solid #333;
+        }
+        
+        /* 支柱 (A-Pillar) */
+        .frame-pillar-left {
+            position: fixed; top: 0; left: 8vw; width: 3vw; height: 100%;
+            background: linear-gradient(90deg, var(--frame-dark), var(--frame-color));
+            transform: skewX(-10deg);
+            z-index: 490;
+            opacity: 0;
+        }
+        .frame-pillar-right {
+            position: fixed; top: 0; right: 8vw; width: 3vw; height: 100%;
+            background: linear-gradient(-90deg, var(--frame-dark), var(--frame-color));
+            transform: skewX(10deg);
+            z-index: 490;
+            opacity: 0;
+        }
+
+        /* ====== UI SCREENS (HUD) ====== */
+        .hud-container {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: linear-gradient(to bottom, var(--scan-line) 50%, transparent 50%);
+            z-index: 600;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .screen-glass {
+            position: absolute;
+            background: var(--glass-tint);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(2px);
+            overflow: hidden;
+        }
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 240, 255, 0.05) 51%, transparent 51%);
             background-size: 100% 4px;
             pointer-events: none;
-            z-index: 90;
+        }
+        .scan-bar {
+            position: absolute; top: -100%; left: 0; width: 100%; height: 20px;
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 10px var(--primary-color);
+            animation: scan 3s linear infinite;
         }
 
-        /* --- HUD PANELS --- */
-        
-        /* TOP BAR: Header & Compass */
-        .hud-top {
-            position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 60px;
-            background: var(--hud-bg);
-            border-bottom: 2px solid var(--hud-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            /* 下の両角を切り落とす */
+        /* LEFT SCREEN */
+        .screen-left {
+            top: 15%; left: 1%; bottom: 20%; width: 18%;
+            transform: perspective(1000px) rotateY(15deg);
+            border-radius: 10px 0 0 10px;
+            display: flex; flex-direction: column; padding: 15px;
+        }
+        /* RIGHT SCREEN */
+        .screen-right {
+            top: 15%; right: 1%; bottom: 20%; width: 18%;
+            transform: perspective(1000px) rotateY(-15deg);
+            border-radius: 0 10px 10px 0;
+            display: flex; flex-direction: column; padding: 15px;
+        }
+        /* TOP SCREEN (Header) */
+        .screen-top {
+            top: 1%; left: 15%; width: 70%; height: 50px;
             clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-            box-shadow: 0 0 15px var(--hud-color);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 40px; 
             pointer-events: auto;
         }
-        .sys-status { font-weight: 700; font-size: 1.2rem; letter-spacing: 2px; color: var(--hud-color); text-shadow: 0 0 5px var(--hud-color); }
         
-        /* NAVIGATION (Top Center) */
-        .hud-nav ul {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            margin: 0; padding: 0;
+        /* HUD CONTENTS */
+        .hud-text { font-family: 'Share Tech Mono', monospace; color: var(--primary-color); text-transform: uppercase; }
+        .hud-title { font-size: 1.1rem; border-bottom: 2px solid var(--primary-color); margin-bottom: 10px; padding-bottom: 5px; color: var(--text-main); }
+        
+        .skill-row { margin-bottom: 12px; }
+        .skill-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-main); }
+        .skill-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 4px; }
+        .skill-bar-fill { height: 100%; background: var(--primary-color); width: 0; transition: width 1s; box-shadow: 0 0 5px var(--primary-color); }
+        
+        .nav-link {
+            color: var(--text-main); text-decoration: none; margin: 0 15px; font-weight: bold; position: relative; transition: 0.3s;
+            font-family: 'Share Tech Mono', monospace;
         }
-        .hud-nav a {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: 0.3s;
-            position: relative;
-        }
-        .hud-nav a:hover {
-            color: var(--hud-color);
-            text-shadow: 0 0 8px var(--hud-color);
-        }
-        /* 現在地マーカー */
-        .hud-nav a::after {
-            content: '';
-            position: absolute;
-            width: 0%; height: 2px;
-            bottom: -5px; left: 0;
-            background: var(--hud-color);
-            transition: 0.3s;
-        }
-        .hud-nav a:hover::after { width: 100%; }
+        .nav-link:hover { color: var(--primary-color); text-shadow: 0 0 8px var(--primary-color); }
+        .nav-link.active { color: var(--primary-color); }
+        .nav-link.active::after { content:''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: var(--primary-color); }
 
-        /* LEFT PANEL: Status / Pilot Data */
-        .hud-left {
-            position: absolute;
-            top: 20%; left: 0;
-            width: 150px;
-            height: 60%;
-            border-right: 2px solid var(--hud-color);
-            background: linear-gradient(to right, #000 0%, transparent 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding-left: 10px;
-            /* 台形変形 */
-            transform: perspective(500px) rotateY(10deg);
-            transform-origin: left;
-        }
-        .status-bar {
+        /* GitHub Contribution Graph Style */
+        .github-graph {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: auto;
             margin-bottom: 20px;
-            text-align: right;
-            padding-right: 10px;
-        }
-        .label { font-size: 0.8rem; color: var(--hud-color); display: block; }
-        .bar-frame {
-            width: 100%; height: 10px;
-            border: 1px solid var(--text-main);
-            margin-top: 5px;
             position: relative;
         }
-        .bar-fill {
-            height: 100%;
-            background: var(--hud-color);
-            box-shadow: 0 0 10px var(--hud-color);
-            animation: pulse 2s infinite;
-        }
-
-        /* RIGHT PANEL: Radar / Info */
-        .hud-right {
-            position: absolute;
-            top: 20%; right: 0;
-            width: 150px;
-            height: 60%;
-            border-left: 2px solid var(--hud-color);
-            background: linear-gradient(to left, #000 0%, transparent 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* 台形変形 */
-            transform: perspective(500px) rotateY(-10deg);
-            transform-origin: right;
-        }
-        .radar-circle {
-            width: 100px; height: 100px;
-            border: 2px solid var(--hud-color);
-            border-radius: 50%;
-            position: relative;
-            background: radial-gradient(circle, transparent 20%, rgba(0, 240, 255, 0.1) 80%);
-            box-shadow: inset 0 0 10px var(--hud-color);
-        }
-        .radar-scan {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 50%; height: 2px;
-            background: var(--hud-color);
-            transform-origin: 0 0;
-            animation: radar-spin 3s linear infinite;
-        }
-
-        /* BOTTOM PANEL: Weapon/Works Summary */
-        .hud-bottom {
-            position: absolute;
-            bottom: 0; left: 0;
+        .git-dot {
             width: 100%;
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 50px;
+            aspect-ratio: 1;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 2px;
+            transition: 0.3s;
         }
-        /* コックピットの斜めの柱（装飾） */
-        .pillar {
-            width: 200px; height: 100px;
-            background: var(--frame-color);
-            border-top: 2px solid #555;
-            position: relative;
-        }
-        .pillar.left {
-            clip-path: polygon(0 0, 70% 0, 100% 100%, 0% 100%);
-            border-right: 2px solid var(--hud-color);
-        }
-        .pillar.right {
-            clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
-            border-left: 2px solid var(--hud-color);
-        }
-
-        /* ====== MAIN SCROLL CONTENT ====== */
-        /* コンテンツは中央の「窓」の中に表示されるように見せる */
-        .content-container {
-            position: relative;
+        .git-dot:hover {
+            transform: scale(1.2);
             z-index: 10;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 150px 20px 150px 20px; /* HUDに被らないよう余白確保 */
-            text-align: center;
         }
 
-        /* 各セクションのデザイン（ホログラムパネル風） */
-        .holo-panel {
-            background: rgba(0, 15, 20, 0.7);
-            border: 1px solid var(--hud-color);
+        /* GitHub Level Colors (0-4) */
+        /* Level 0 uses default background */
+        .git-dot.active-1 { background: rgba(0, 240, 255, 0.2); }
+        .git-dot.active-2 { background: rgba(0, 240, 255, 0.45); box-shadow: 0 0 3px var(--primary-color); }
+        .git-dot.active-3 { background: rgba(0, 240, 255, 0.8); box-shadow: 0 0 6px var(--primary-color); }
+        .git-dot.active-4 { background: #fff; box-shadow: 0 0 10px #fff; border: 1px solid var(--primary-color); }
+
+        /* BATT Display - Header Adjusted */
+        .batt-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: auto;
+            min-width: 150px;
+        }
+        .batt-icon {
+            width: 40px; height: 12px;
+            border: 1px solid var(--primary-color);
+            padding: 1px;
+            position: relative;
+            margin-right: 10px;
+        }
+        .batt-icon::after {
+            content: ''; position: absolute; right: -3px; top: 2px; width: 2px; height: 6px; background: var(--primary-color);
+        }
+        .batt-level {
+            height: 100%; background: var(--primary-color); width: 50%;
+            box-shadow: 0 0 5px var(--primary-color);
+            transition: width 0.5s ease;
+        }
+
+        /* ====== MAIN CONTENT AREA ====== */
+        #main-viewport {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow-y: scroll;
+            scroll-behavior: smooth;
+            z-index: 100;
+            padding-top: 100px; 
+            padding-bottom: 150px;
+        }
+        
+        .content-wrapper {
+            width: 50%; 
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        section {
+            background: rgba(10, 20, 30, 0.85);
+            border: 1px solid var(--secondary-color);
             margin-bottom: 80px;
             padding: 40px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(30px);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
             position: relative;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
         }
-        /* パネルの四隅の装飾 */
-        .holo-panel::before {
-            content: ''; position: absolute; top: -1px; left: -1px;
-            width: 20px; height: 20px;
-            border-top: 3px solid var(--hud-color);
-            border-left: 3px solid var(--hud-color);
+        section::before {
+            content: ''; position: absolute; top: -1px; left: -1px; width: 30px; height: 30px;
+            border-top: 3px solid var(--primary-color); border-left: 3px solid var(--primary-color);
         }
-        .holo-panel::after {
-            content: ''; position: absolute; bottom: -1px; right: -1px;
-            width: 20px; height: 20px;
-            border-bottom: 3px solid var(--hud-color);
-            border-right: 3px solid var(--hud-color);
+        section::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px; width: 30px; height: 30px;
+            border-bottom: 3px solid var(--primary-color); border-right: 3px solid var(--primary-color);
         }
 
-        h1 { font-size: 4rem; margin: 0; text-transform: uppercase; text-shadow: 0 0 10px var(--hud-color); }
         h2 { 
-            font-size: 2.5rem; 
-            border-bottom: 1px solid var(--hud-color); 
-            display: inline-block; 
-            padding: 0 20px;
-            margin-bottom: 30px;
-            color: var(--hud-color);
+            border-left: 5px solid var(--primary-color); 
+            padding-left: 20px; 
+            color: var(--primary-color); 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            font-family: 'Share Tech Mono', monospace; 
         }
-        p { font-size: 1.2rem; line-height: 1.8; color: #ccc; }
+        
+        .log-item { display: flex; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .log-date { width: 100px; color: var(--primary-color); font-weight: bold; font-family: 'Share Tech Mono'; }
+        .log-content { color: #fff; }
+        .log-highlight { color: #fff; font-weight: bold; text-shadow: 0 0 5px var(--alert-color); }
+        .log-date-highlight { width: 100px; color: var(--alert-color); font-weight: bold; font-family: 'Share Tech Mono'; }
 
-        /* Timeline (Career) */
-        .timeline-item {
+        /* ====== HORIZONTAL SCROLL WORKS ====== */
+        .horizontal-scroll {
             display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
-            padding: 15px 0;
-            text-align: left;
-        }
-        .timeline-date { color: var(--hud-color); font-weight: bold; width: 120px; flex-shrink: 0;}
-
-        /* Works Grid */
-        .works-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px; 
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
         }
-        .work-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #444;
-            padding: 15px;
+
+        .card {
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid #444; 
+            padding: 10px; 
             transition: 0.3s;
-            text-decoration: none;
-            color: #fff;
+            text-decoration: none; 
+            color: #fff; 
             display: block;
+            
+            /* 固定幅設定（巨大化防止） */
+            width: 300px;
+            flex: 0 0 300px; 
+            scroll-snap-align: start;
         }
-        .work-card:hover {
-            border-color: var(--hud-color);
-            background: rgba(0, 240, 255, 0.1);
-            transform: translateY(-5px);
+        
+        .card:hover { border-color: var(--primary-color); background: rgba(0, 240, 255, 0.1); transform: scale(1.02); }
+
+        .card-img-container {
+            width: 100%;
+            height: 170px; /* 高さ固定 */
+            background: #000; 
+            overflow: hidden;
+            border-bottom: 1px solid #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .work-card img { width: 100%; height: 140px; object-fit: cover; filter: grayscale(80%); transition: 0.3s;}
-        .work-card:hover img { filter: grayscale(0%); }
 
-        /* Footer */
-        footer { margin-top: 50px; color: #666; font-size: 0.9rem; }
+        .card-img-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; /* 枠内に完全に収める */
+            transition: 0.5s; 
+        }
+        
+        .card:hover img { filter: brightness(1.2); }
 
-        /* ====== ANIMATIONS ====== */
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        @keyframes radar-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ANIMATIONS */
+        @keyframes scan { 0% { top: -100%; } 100% { top: 200%; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes batt-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .hud-left, .hud-right { display: none; } /* スマホでは左右パネルを消す */
-            .hud-top { width: 100%; padding: 0 10px; }
-            .pillar { width: 100px; }
-            h1 { font-size: 2.5rem; }
+        /* Media Query */
+        @media (max-width: 1200px) {
+            .content-wrapper { width: 60%; }
         }
 
     </style>
 </head>
 <body>
 
-    <video autoplay muted loop id="bg-video">
+    <!-- VIDEO BACKGROUND -->
+    <video autoplay muted loop id="bg-video" playsinline>
         <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
     </video>
 
-    <div class="scanlines"></div>
+    <!-- START SCREEN -->
+    <div id="start-screen">
+        <h1 style="letter-spacing: 10px; text-shadow: 0 0 20px var(--primary-color);">NEURAL LINK</h1>
+        <button class="start-btn" onclick="initSystem()">INITIATE SEQUENCE</button>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">WARNING: HEAVY DATA TRAFFIC AHEAD</p>
+    </div>
 
-    <div class="cockpit-ui">
+    <!-- MECHANICAL FRAMES -->
+    <div class="mech-frame frame-top"></div>
+    <div class="mech-frame frame-bottom"></div>
+    <div class="mech-frame frame-left"></div>
+    <div class="mech-frame frame-right"></div>
+    <div class="frame-pillar-left"></div>
+    <div class="frame-pillar-right"></div>
+
+    <!-- HUD LAYERS -->
+    <div class="hud-container">
         
-        <header class="hud-top">
-            <div class="sys-status">SYS: ONLINE</div>
-            <nav class="hud-nav">
-                <ul>
-                    <li><a href="#about">PILOT</a></li>
-                    <li><a href="#career">LOG</a></li>
-                    <li><a href="#works">ARMORY</a></li>
-                    <li><a href="#contact">COMMS</a></li>
-                </ul>
+        <!-- Top Navigation -->
+        <div class="screen-glass screen-top">
+            <div class="hud-text" style="font-weight: bold;">SYS: ONLINE</div>
+            <nav>
+                <a href="#about" class="nav-link">ABOUT</a>
+                <a href="#career" class="nav-link">CARRIER</a>
+                <a href="#works" class="nav-link">WORKS</a>
+                <a href="#contact" class="nav-link">COMMS</a>
             </nav>
-            <div id="battery-display" class="sys-status" style="font-size: 1rem;">BATT: --%</div>
-        </header>
+            <!-- BATT Area (Dynamic) -->
+            <div class="batt-container">
+                <div class="batt-icon">
+                    <div class="batt-level" id="batt-bar"></div>
+                </div>
+                <span class="hud-text" id="battery-display" style="font-size: 0.8rem;">LOADING...</span>
+            </div>
+        </div>
 
-        <aside class="hud-left">
-            <div class="status-bar">
-                <span class="label">PYTHON</span>
-                <div class="bar-frame"><div class="bar-fill" style="width: 90%;"></div></div>
+        <!-- Left Status Panel -->
+        <div class="screen-glass screen-left">
+            <div class="scan-line"></div><div class="scan-bar"></div>
+            <div class="hud-title">PILOT STATUS</div>
+            <div class="skill-row">
+                <div class="skill-label"><span>SYNC RATE</span><span>98%</span></div>
+                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 98%;"></div></div>
             </div>
-            <div class="status-bar">
-                <span class="label">C++ / EMBEDDED</span>
-                <div class="bar-frame"><div class="bar-fill" style="width: 75%;"></div></div>
+            <div class="hud-title" style="margin-top: 20px;">SKILLS</div>
+            <div class="skill-row">
+                <div class="skill-label"><span>PYTHON / AI</span><span>LV.2</span></div>
+                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 80%;"></div></div>
             </div>
-            <div class="status-bar">
-                <span class="label">ROBOTICS</span>
-                <div class="bar-frame"><div class="bar-fill" style="width: 85%;"></div></div>
+            <div class="skill-row">
+                <div class="skill-label"><span>ROBOTICS</span><span>LV.3</span></div>
+                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 95%;"></div></div>
             </div>
-            <div class="status-bar">
-                <span class="label">MENTAL</span>
-                <div class="bar-frame"><div class="bar-fill" style="width: 100%; background: #ffaa00;"></div></div>
+            <div class="skill-row">
+                <div class="skill-label"><span>LEADERSHIP</span><span>MAX</span></div>
+                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 100%; background: #ffaa00;"></div></div>
             </div>
-        </aside>
+        </div>
 
-        <aside class="hud-right">
-            <div class="radar-circle">
-                <div class="radar-scan"></div>
-            </div>
-            <div style="margin-top: 20px; text-align: left; width: 100%; padding-left: 20px;">
-                <span class="label">ENV: RAIN</span>
-                <span class="label">LOC: OSAKA</span>
-                <span class="label">OBJ: WIN</span>
-            </div>
-        </aside>
+        <!-- Right Info Panel -->
+        <div class="screen-glass screen-right">
+            <div class="scan-line"></div>
+            <div class="hud-title">MISSION OBJ.</div>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.5; color: #ccc; margin-bottom: 20px;">
+                <li>> WIN ROBOCON</li>
+                <li>> OPTIMIZE CODE</li>
+                <li>> LEAD TEAM</li>
+            </ul>
 
-        <div class="hud-bottom">
-            <div class="pillar left"></div>
-            <div class="pillar right"></div>
+            <div class="hud-title" style="font-size: 0.9rem;">CODE ACTIVITY</div>
+            <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 5px;">@hou-rai3 (LAST 49 DAYS)</div>
+            <!-- GitHub Graph Area -->
+            <div class="github-graph" id="git-graph">
+                <!-- JSで生成 -->
+            </div>
+            
+        </div>
+
+    </div>
+
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <div id="main-viewport">
+        <div class="content-wrapper">
+            
+            <section id="hero" style="text-align: center; border: none; background: transparent; box-shadow: none;">
+                <h1 style="font-size: 4rem; margin: 0; text-shadow: 0 0 20px var(--primary-color); font-family: 'Share Tech Mono';">MINATO ARCHIVES</h1>
+                <p style="letter-spacing: 5px; color: var(--primary-color);">OSAKA METROPOLITAN UNIV. CT // ROBOT TEAM LEADER</p>
+            </section>
+
+            <section id="about">
+                <h2>ABOUT</h2> 
+                <p>
+                    <strong>Name:</strong> 岡部昊斗 (Minato Okabe)<br>
+                    <strong>Affiliation:</strong> 大阪公立大学工業高等専門学校 ろぼっと倶楽部<br><br>
+                    2023年入学。ろぼっと倶楽部に所属し、全国大会優勝を目標に活動中。<br>
+                    1・2年は制御班としてロボットのプログラムを担当。<br>
+                    3年からはチームリーダーを務め、マネジメントによりチームを牽引。
+                </p>
+            </section>
+
+            <section id="career">
+                <h2>CARRIER</h2>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="log-item">
+                        <span class="log-date">2023.04</span>
+                        <span class="log-content">大阪公立大学工業高等専門学校 入学</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date">2023.12</span>
+                        <span class="log-content">廃炉創造ロボコン 協賛企業特別賞 受賞</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date">2024.03</span>
+                        <span class="log-content">関西春ロボコン2024 出場</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date">2024.10</span>
+                        <span class="log-content">高専ロボコン2024 近畿地区大会 準優勝</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date-highlight">2024.11</span>
+                        <span class="log-highlight">高専ロボコン2024 全国大会 優勝</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date">2025.03</span>
+                        <span class="log-content">関西春ロボコン2025 出場</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-date">2025.09</span>
+                        <span class="log-content">高専ロボコン2025 地区大会敗退</span>
+                    </div>
+                    <div class="log-item" style="border-bottom: none;">
+                        <span class="log-date" style="color: #888;">NEXT...</span>
+                        <span class="log-content" style="color: #aaa;">DISCOロボコン2026 出場予定</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="works">
+                <h2>WORKS</h2>
+                <!-- 横スクロールコンテナ -->
+                <div class="horizontal-scroll">
+                    
+                    <a href="https://github.com/hou-rai3/battle_with_slime" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\slime.png" alt="Game">
+                        </div>
+                        <h3>VS 最強スライム</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">高難易度シミュレーションゲーム</p>
+                    </a>
+                    
+                    <a href="https://github.com/hou-rai3/Pose_Estimation" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\kousensai4.png" alt="Dungeon">
+                        </div>
+                        <h3>没入型ダンジョン探索</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">君の声と動きで攻略せよ</p>
+                    </a>
+                    
+                    <a href="https://github.com/hou-rai3/steering_simulator_ultimate-edition" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\steer.png" alt="Sim">
+                        </div>
+                        <h3>4輪独立ステアシミュレーター</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">ロボット挙動物理演算</p>
+                    </a>
+                    
+                    <a href="https://kansai-harurobo.org/" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\hing.png" alt="Robot">
+                        </div>
+                        <h3>関西春ロボコン2024</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">ロボット制御</p>
+                    </a>
+                    
+                    <a href="https://robotclub.sakigake-robo.com/" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\himari.png" alt="Robot">
+                        </div>
+                        <h3>NHK高専ロボコン2024</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">R1機体制御</p>
+                    </a>
+                    
+                    <a href="https://kansai-harurobo.org/" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\greathing.png" alt="Robot">
+                        </div>
+                        <h3>関西春ロボコン2025</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">チームリーダー</p>
+                    </a>
+                    
+                    
+                    <a href="https://official-robocon.com/kosen/" class="card">
+                        <div class="card-img-container">
+                            <img src="C:\original_games\portforio\images\isana.png" alt="Robot">
+                        </div>
+                        <h3>NHK高専ロボコン2025</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">チームリーダー</p>
+                    </a>
+                    
+                    <a href="#" class="card">
+                        <div class="card-img-container">
+                            <img src="" alt="Robot">
+                        </div>
+                        <h3>DISCOロボコン2026</h3>
+                        <p style="font-size: 0.8rem; color: #ccc;">Coming Soon</p>
+                    </a>
+                </div>
+            </section>
+
+            <section id="contact">
+                <h2>COMMS</h2> 
+                <p>お問い合わせはこちらから。</p>
+                <a href="mailto:om.repository@gmail.com" style="display: inline-block; padding: 10px 20px; border: 1px solid var(--primary-color); color: var(--primary-color); text-decoration: none; margin-top: 20px; font-weight: bold; background: rgba(0,240,255,0.1);">SEND TRANSMISSION</a>
+            </section>
+
+            <footer style="text-align: center; margin-bottom: 100px; color: #555; font-size: 0.8rem;">
+                &copy; 2025 MINATO OKABE. SYSTEM VER 3.12
+            </footer>
         </div>
     </div>
 
-    <main class="content-container">
-        
-        <section id="hero" style="height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-            <p style="color: var(--hud-color); letter-spacing: 5px;">WELCOME TO ARCHIVE</p>
-            <h1>MINATO<br>PORTFOLIO</h1>
-            <p>OSAKA METROPOLITAN UNIV. COLLEGE OF TECHNOLOGY<br>ROBOT CLUB TEAM LEADER</p>
-        </section>
-
-        <section id="about" class="holo-panel">
-            <h2>PILOT DATA (About)</h2>
-            <p><strong>Name:</strong> 岡部昊斗 / Okabe Minato</p>
-            <p style="margin-top: 20px;">
-                2023年に大阪公立大学工業高等専門学校に入学。<br>
-                「ろぼっと倶楽部」所属のチームリーダー。<br>
-                NHK高専ロボコンでの全国優勝を目標に<br>
-                日夜技術研鑽と戦略構築に従事している。
-            </p>
-        </section>
-
-        <section id="career" class="holo-panel">
-            <h2>MISSION LOG (Career)</h2>
-            <div class="career-list">
-                <div class="timeline-item">
-                    <span class="timeline-date">2023/04</span>
-                    <span>大阪公立大学工業高等専門学校 入学</span>
-                </div>
-                <div class="timeline-item">
-                    <span class="timeline-date">2023/12</span>
-                    <span>廃炉創造ロボコン 協賛企業特別賞 受賞</span>
-                </div>
-                <div class="timeline-item">
-                    <span class="timeline-date">2024/03</span>
-                    <span>関西春ロボコン2024 出場</span>
-                </div>
-                <div class="timeline-item">
-                    <span class="timeline-date">2024/10</span>
-                    <span>高専ロボコン2024 近畿地区大会 準優勝</span>
-                </div>
-                <div class="timeline-item" style="border-left: 3px solid var(--hud-alert); padding-left: 10px;">
-                    <span class="timeline-date" style="color: var(--hud-alert);">2024/11</span>
-                    <span style="color: #fff; font-weight: bold;">高専ロボコン2024 全国大会 優勝</span>
-                </div>
-                <div class="timeline-item">
-                    <span class="timeline-date">2025/09</span>
-                    <span>高専ロボコン2025 地区大会敗退</span>
-                </div>
-                <div class="timeline-item">
-                    <span class="timeline-date">NEXT...</span>
-                    <span>DISCOロボコン2026 出場予定</span>
-                </div>
-            </div>
-        </section>
-
-        <section id="works" class="holo-panel">
-            <h2>ARSENAL (Works)</h2>
-            <div class="works-grid">
-                <a class="work-card" href="https://github.com/hou-rai3/PG1_07_task4.git" target="_blank">
-                    <img src="images/slime.png" alt="VS Slime">
-                    <h3 style="margin: 10px 0 5px 0;">VS 最強スライム</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">高難易度バトルシミュレーション</p>
-                </a>
-                <a class="work-card" href="https://github.com/hou-rai3/Pose_Estimation" target="_blank">
-                    <img src="images/kousensai4.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">人体認識システム</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">機械学習による動作検知</p>
-                </a>
-                <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="images/steer.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">4輪独立ステアシミュ</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">ロボット足回りの挙動計算</p>
-                </a>
-                 <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="images/hing.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">関西春ロボコン2025</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">ロボット制御</p>
-                </a>
-                 <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="images/himari.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">高専ロボコン2024</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">ロボット制御</p>
-                </a>
-                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="images/greathing.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">関西春ロボコン2025</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">チームリーダー</p>
-                </a>
-                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="images/isana.png" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">高専ロボコン2025</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">チームリーダー</p>
-                </a>
-                  <a class="work-card" href="https://github.com/hou-rai3/steering_simulator" target="_blank">
-                    <img src="" alt="Steering Sim">
-                    <h3 style="margin: 10px 0 5px 0;">DISCOロボコン2026</h3>
-                    <p style="font-size: 0.9rem; margin: 0;">coming soon...</p>
-                </a>
-            </div>
-        </section>
-
-        <section id="contact" style="padding-bottom: 100px;">
-            <h2>COMMS LINK</h2>
-            <p>TRANSMISSION TARGET: <br>
-            <a href="mailto:om.repository@gmail.com" style="color: var(--hud-color); font-size: 1.5rem;">om.repository@gmail.com</a></p>
-        </section>
-        
-        <footer>
-            <p>&copy; 2025 MINATO ARCHIVES // ALL RIGHTS RESERVED.</p>
-        </footer>
-
-    </main>
-
+    <!-- GSAP for Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
     <script>
-        // 簡単なスクロールアニメーション（各パネルがふわっと出現）
         gsap.registerPlugin(ScrollTrigger);
-        
-        gsap.utils.toArray('.holo-panel').forEach(panel => {
-            gsap.from(panel, {
-                scrollTrigger: {
-                    trigger: panel,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                },
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                ease: "power2.out"
-            });
-        });
-        const batteryDisplay = document.getElementById('battery-display');
 
-    // ブラウザがBattery APIに対応しているかチェック
-    if ('getBattery' in navigator) {
-        navigator.getBattery().then(function(battery) {
+        // === SYSTEM INITIALIZATION SEQUENCE (Faster) ===
+        function initSystem() {
+            const tl = gsap.timeline();
+
+            // 1. スタート画面を消す
+            tl.to("#start-screen", { opacity: 0, duration: 0.3, onComplete: () => document.getElementById('start-screen').style.display = 'none' });
+
+            // 2. メカフレーム（ハッチ）が閉まる [高速化]
+            tl.to(".frame-left", { left: 0, duration: 0.5, ease: "power2.inOut" }, "close-side");
+            tl.to(".frame-right", { right: 0, duration: 0.5, ease: "power2.inOut" }, "close-side");
             
-            // バッテリー情報を更新する関数
-            function updateBatteryUI() {
-                const level = Math.floor(battery.level * 100);
-                const isCharging = battery.charging;
+            tl.to(".frame-top", { top: 0, duration: 0.6, ease: "power4.inOut" }, "close-vert-=0.1"); 
+            tl.to(".frame-bottom", { bottom: 0, duration: 0.6, ease: "power4.inOut" }, "close-vert-=0.1");
+
+            // 支柱の出現
+            tl.to([".frame-pillar-left", ".frame-pillar-right"], { opacity: 1, duration: 0.2 }, "-=0.2");
+
+            // 3. システム起動エフェクト (HUD点灯)
+            tl.to(".hud-container", { opacity: 1, duration: 0.1 }); 
+            tl.from(".screen-glass", { scaleY: 0, opacity: 0, duration: 0.3, stagger: 0.1, ease: "back.out(1.7)" });
+            
+            // 4. コンテンツ表示許可 & 各種初期化
+            tl.add(() => {
+                document.body.style.overflow = "auto";
+                initScrollAnimations();
+                initBatterySystem();
+                initGitHubGraph(); // GitHub連携開始
                 
-                // 表示テキストの作成
-                let text = `BATT: ${level}%`;
-                if (isCharging) {
-                    text += ' [CHRG]'; // 充電中の表記
+                // 横スクロールのホイール操作補助
+                const scrollContainer = document.querySelector('.horizontal-scroll');
+                if(scrollContainer) {
+                    scrollContainer.addEventListener('wheel', (evt) => {
+                        if (!evt.shiftKey) { 
+                            evt.preventDefault();
+                            scrollContainer.scrollLeft += evt.deltaY;
+                        }
+                    });
                 }
-                batteryDisplay.textContent = text;
+            });
+        }
 
-                // 演出: 20%以下で警告色（赤）、それ以外は通常色（シアン）
-                if (level <= 20 && !isCharging) {
-                    batteryDisplay.style.color = 'var(--hud-alert)';
-                    batteryDisplay.style.textShadow = '0 0 10px var(--hud-alert)';
-                } else {
-                    batteryDisplay.style.color = 'var(--hud-color)';
-                    batteryDisplay.style.textShadow = '0 0 5px var(--hud-color)';
+        function initScrollAnimations() {
+            gsap.utils.toArray('section').forEach(section => {
+                gsap.to(section, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%",
+                        toggleActions: "play none none reverse",
+                        scroller: "#main-viewport"
+                    },
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: "power2.out"
+                });
+            });
+        }
+
+        // === GITHUB GRAPH INTEGRATION (IMPROVED ALGORITHM) ===
+        async function initGitHubGraph() {
+            const username = 'hou-rai3';
+            const graphContainer = document.getElementById('git-graph');
+            
+            try {
+                // 修正: ユーザーの「全期間」のデータを取得するエンドポイントを使用
+                const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`);
+                const data = await response.json();
+                
+                // 全期間のコントリビューション配列
+                const contributions = data.contributions || [];
+                
+                // データが存在しない場合のガード
+                if (contributions.length === 0) throw new Error("No data found");
+
+                // 末尾49件（最新の49日分）を取得
+                const recentContributions = contributions.slice(-49);
+
+                // もし活動開始から49日経っていない場合は埋める
+                while (recentContributions.length < 49) {
+                    recentContributions.unshift({ count: 0, level: 0 });
                 }
+
+                graphContainer.innerHTML = ''; // クリア
+
+                recentContributions.forEach(day => {
+                    const dot = document.createElement('div');
+                    dot.className = 'git-dot';
+                    
+                    // GitHubのlevel (0-4) をCSSクラスに正確にマッピング
+                    // CSS側で .active-4 を追加済み
+                    if (day.level > 0) {
+                        dot.classList.add(`active-${day.level}`);
+                    }
+                    
+                    // Tooltip
+                    dot.title = `${day.date}: ${day.count} contributions`;
+                    
+                    graphContainer.appendChild(dot);
+                });
+
+            } catch (error) {
+                console.error('Failed to fetch GitHub contributions:', error);
+                generateRandomGraph(graphContainer); // エラー時はランダムフォールバック
             }
+        }
 
-            // 初回実行
-            updateBatteryUI();
+        function generateRandomGraph(container) {
+            container.innerHTML = '';
+            for (let i = 0; i < 49; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'git-dot';
+                const rand = Math.random();
+                if (rand > 0.8) dot.classList.add('active-3');
+                else if (rand > 0.6) dot.classList.add('active-2');
+                else if (rand > 0.3) dot.classList.add('active-1');
+                container.appendChild(dot);
+            }
+        }
 
-            // イベントリスナー: 残量変化や充電状態の変化を監視
-            battery.addEventListener('levelchange', updateBatteryUI);
-            battery.addEventListener('chargingchange', updateBatteryUI);
-        });
-    } else {
-        // 非対応ブラウザ（iPhoneなど）の場合のフォールバック表示
-        batteryDisplay.textContent = "BATT: N/A";
-    }
+        // === BATTERY SYSTEM MANAGEMENT ===
+        function initBatterySystem() {
+            const batteryDisplay = document.getElementById('battery-display');
+            const batteryBar = document.getElementById('batt-bar');
+            const battIcon = document.querySelector('.batt-icon');
+
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(function(battery) {
+                    
+                    function updateBatteryUI() {
+                        const level = Math.floor(battery.level * 100);
+                        const isCharging = battery.charging;
+                        
+                        let text = `BATT: ${level}%`;
+                        if (isCharging) {
+                            text += ' [CHRG]';
+                        }
+                        batteryDisplay.textContent = text;
+                        batteryBar.style.width = `${level}%`;
+
+                        if (level <= 20 && !isCharging) {
+                            batteryDisplay.style.color = 'var(--alert-color)';
+                            batteryDisplay.style.textShadow = '0 0 10px var(--alert-color)';
+                            batteryBar.style.background = 'var(--alert-color)';
+                            batteryBar.style.boxShadow = '0 0 5px var(--alert-color)';
+                            battIcon.style.borderColor = 'var(--alert-color)';
+                            batteryBar.style.animation = 'blink 0.5s infinite';
+                        } else {
+                            batteryDisplay.style.color = 'var(--primary-color)';
+                            batteryDisplay.style.textShadow = 'none';
+                            batteryBar.style.background = 'var(--primary-color)';
+                            batteryBar.style.boxShadow = '0 0 5px var(--primary-color)';
+                            battIcon.style.borderColor = 'var(--primary-color)';
+                            batteryBar.style.animation = 'batt-pulse 4s infinite';
+                        }
+                    }
+
+                    updateBatteryUI();
+
+                    battery.addEventListener('levelchange', updateBatteryUI);
+                    battery.addEventListener('chargingchange', updateBatteryUI);
+                });
+            } else {
+                batteryDisplay.textContent = "BATT: N/A";
+                batteryBar.style.width = "100%";
+            }
+        }
+
     </script>
 </body>
 </html>
