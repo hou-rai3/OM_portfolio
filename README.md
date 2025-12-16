@@ -16,18 +16,13 @@
 - **GSAP (GreenSock Animation Platform)** を使用し、Timeline制御による精密なアニメーションを実装。
 - メカニカルなハッチの開放、HUDの展開、ガラスの反射エフェクトなどを順番に実行し、コックピットに乗り込むような雰囲気を演出しています。
 
-### 2. Real-time Battery Sync
-HUD上部の `BATT` 表示について。
-- **Battery Status API** を使用し、**「閲覧者デバイスの実際のバッテリー残量」** をリアルタイムで取得・表示しています。
-- 充電中は `[CHRG]` マークが点灯。
-- 残量が20%を切ると、ゲージと文字色が**赤**に変化し、点滅するアラートモードへ移行します。
 
-### 3. Live GitHub Activity Graph
+### 2. Live GitHub Activity Graph
 HUD右側の `CODE ACTIVITY` パネルには、実際のGitHub活動状況が表示されます。
 - 外部APIを使用し、私 `@hou-rai3` の直近49日間のコントリビューションデータを動的にフェッチ。
 - 取得したデータを、GitHub純正の色ではなく、サイトのテーマカラーであるシアンブルーに合わせてCSSクラスでマッピングし直し、HUDのデザインに統合しています。
 
-### 4. Immersion Background
+### 3. Immersion Background
 - 背景には没入感を高める環境映像を配置し、CSSフィルタで彩度と明度を調整してUIの視認性を確保しています。
 - 今後はロボコンの動画に差し替えたいと考えています。
 
