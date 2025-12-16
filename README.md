@@ -46,6 +46,9 @@ HUD右側の `CODE ACTIVITY` パネルには、実際のGitHub活動状況が表
 ```text
 .
 ├── index.html      # メイン構造・JSロジック
-├── style.css       # デザイン・装飾（レスポンシブ対応）
+├── css       # デザイン・装飾（レスポンシブ対応）
+│    └──main.css
+├── js       # デザイン・装飾（レスポンシブ対応）
+│    └──main.js
 ├── images/         # 制作物サムネイル画像
 └── README.md       # ドキュメント
