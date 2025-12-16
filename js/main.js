@@ -49,19 +49,31 @@ window.initSystem = function() {
 
 // ■ HUDシステム（常時稼働系）
 function startHudSystems() {
-    // バッテリー表示
+    // 【修正】バッテリー表示：APIを使わず、演出として100%へアニメーションさせる
+    // これにより、どのブラウザでも確実に動作します
+    const batteryDisplay = document.getElementById("battery-display");
+    
     gsap.to("#batt-bar", {
-        width: "100%",
+        width: "100%", // バーを100%にする
         duration: 2,
         ease: "power1.inOut",
         onUpdate: function() {
+            // バーの伸びに合わせて数値をカウントアップさせる演出
             const val = Math.round(this.ratio * 100);
-            const disp = document.getElementById("battery-display");
-            if(disp) disp.innerText = `POWER: ${val}%`;
+            if(batteryDisplay) {
+                batteryDisplay.innerText = `POWER: ${val}%`;
+                
+                // 演出：文字色を少し変化させる（オプション）
+                if(val < 30) batteryDisplay.style.color = "var(--alert-color)";
+                else batteryDisplay.style.color = "var(--primary-color)";
+            }
+        },
+        onComplete: function() {
+            if(batteryDisplay) batteryDisplay.innerText = "POWER: 100% [MAX]";
         }
     });
 
-    // スキルバー
+    // スキルバーのアニメーション
     gsap.utils.toArray(".skill-bar-fill").forEach((bar) => {
         const width = bar.style.width; 
         gsap.fromTo(bar, 
@@ -74,24 +86,21 @@ function startHudSystems() {
     initScrollEffects();
 }
 
-// ■ スクロール連動エフェクト（★修正箇所）
+// ■ スクロール連動エフェクト
 function initScrollEffects() {
-    // ScrollTriggerの位置計算をリフレッシュ
     ScrollTrigger.refresh();
 
     const sections = gsap.utils.toArray("section");
     sections.forEach((section) => {
-        // ★修正: gsap.from ではなく gsap.to を使用
-        // CSSで opacity: 0 になっているので、opacity: 1 (見える状態) にアニメーションさせる
         gsap.to(section, {
             scrollTrigger: {
                 trigger: section,
                 start: "top 80%", 
                 toggleActions: "play none none reverse",
-                scroller: "#main-viewport" // スクロールコンテナの指定
+                scroller: "#main-viewport"
             },
-            y: 0,          // 定位置に戻す
-            opacity: 1,    // 不透明にする
+            y: 0,
+            opacity: 1,
             duration: 0.8,
             ease: "power2.out"
         });
@@ -116,39 +125,32 @@ async function initGitHubGraph() {
     if (!graphContainer) return;
     
     try {
-        // APIからデータを取得
         const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`);
         const data = await response.json();
         const contributions = data.contributions || [];
         
         if (contributions.length === 0) throw new Error("No data found");
 
-        // 直近49日分を取得
         const recentContributions = contributions.slice(-49);
 
-        // データが足りない場合の埋め合わせ
         while (recentContributions.length < 49) {
             recentContributions.unshift({ count: 0, level: 0 });
         }
 
-        graphContainer.innerHTML = ''; // クリア
+        graphContainer.innerHTML = ''; 
 
         recentContributions.forEach(day => {
             const dot = document.createElement('div');
             dot.className = 'git-dot';
-            
-            // レベルに応じたクラス付与 (active-1 ~ active-4)
             if (day.level > 0) {
                 dot.classList.add(`active-${day.level}`);
             }
-            
             dot.title = `${day.date}: ${day.count} contributions`;
             graphContainer.appendChild(dot);
         });
 
     } catch (error) {
         console.error('GitHub API Error:', error);
-        // エラー時はダミーを表示
         generateDummyGraph(graphContainer);
     }
 }
