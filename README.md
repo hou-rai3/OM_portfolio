@@ -6,7 +6,7 @@
 **"NEURAL LINK ESTABLISHED."**
 
 大阪公立大学工業高等専門学校 岡部昊斗のポートフォリオサイトです。
- 
+[こちら](https://hou-rai3.github.io/OM_portfolio/)からご覧になれます。
 ## System Gimmicks (技術的な小ネタ)
 
 没入感とかっこよさを高めるためのギミックを搭載しています。
