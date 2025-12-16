@@ -5,403 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINATO // MECH INTERFACE</title>
     <meta name="description" content="Minato Portfolio - Mech Cockpit Interface">
-    <!-- フォント読み込み -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
-    <style>
-        /* ====== CORE SETTINGS ====== */
-        :root {
-            --primary-color: #00f0ff;       /* メイン発光色（シアン） */
-            --secondary-color: #00a8ff;     /* サブ発光色（濃い青） */
-            --alert-color: #ff3333;         /* 警告色 */
-            --bg-color: #050a10;            /* ベース背景色 */
-            --frame-color: #1a1f24;         /* 機体フレーム色 */
-            --frame-dark: #0f1215;          /* 機体フレーム影色 */
-            --glass-tint: rgba(0, 240, 255, 0.05); /* ガラスの着色 */
-            --text-main: #e0faff;
-            
-            --ease-mech: cubic-bezier(0.2, 0.8, 0.2, 1); /* 機械的な動き */
-        }
-
-        * { box-sizing: border-box; }
-        
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Rajdhani', sans-serif;
-            background-color: #000;
-            color: var(--text-main);
-            overflow: hidden; /* 起動まではスクロール禁止 */
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* カスタムスクロールバー */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--primary-color); }
-        ::-webkit-scrollbar-corner { background: #000; }
-
-        /* ====== BACKGROUND (WORLD) ====== */
-        #bg-video {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            object-fit: cover;
-            z-index: -1;
-            filter: brightness(0.6) contrast(1.1) hue-rotate(180deg);
-            transition: filter 2s;
-        }
-
-        /* ====== START SCREEN (Overlay) ====== */
-        #start-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(2px);
-        }
-        
-        .start-btn {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.5rem;
-            padding: 15px 40px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            position: relative;
-            overflow: hidden;
-            transition: 0.3s;
-            box-shadow: 0 0 15px var(--primary-color);
-        }
-        .start-btn:hover {
-            background: rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 30px var(--primary-color);
-            letter-spacing: 6px;
-        }
-        .start-btn::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            transition: 0.5s;
-        }
-        .start-btn:hover::before { left: 100%; }
-
-        /* ====== COCKPIT FRAMES (The Mech Parts) ====== */
-        .mech-frame {
-            position: fixed;
-            z-index: 500;
-            background: var(--frame-color);
-            box-shadow: inset 0 0 20px #000;
-            background-image: 
-                linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(0,0,0,0.3) 100%),
-                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
-        }
-
-        /* 上部フレーム（ハッチ） */
-        .frame-top {
-            top: -50%;
-            left: 0; width: 100%; height: 8vh;
-            clip-path: polygon(0 0, 100% 0, 100% 60%, 80% 100%, 20% 100%, 0 60%);
-            border-bottom: 2px solid #333;
-        }
-        /* 下部フレーム（コンソール） */
-        .frame-bottom {
-            bottom: -50%;
-            left: 0; width: 100%; height: 12vh;
-            clip-path: polygon(0 100%, 100% 100%, 100% 30%, 85% 0, 15% 0, 0 30%);
-            border-top: 2px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-        }
-        /* 左サイドフレーム */
-        .frame-left {
-            top: 0; left: -50%;
-            width: 8vw; height: 100%;
-            clip-path: polygon(0 0, 100% 0, 60% 15%, 60% 85%, 100% 100%, 0 100%);
-            border-right: 2px solid #333;
-        }
-        /* 右サイドフレーム */
-        .frame-right {
-            top: 0; right: -50%;
-            width: 8vw; height: 100%;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 85%, 40% 15%);
-            border-left: 2px solid #333;
-        }
-        
-        /* 支柱 (A-Pillar) */
-        .frame-pillar-left {
-            position: fixed; top: 0; left: 8vw; width: 3vw; height: 100%;
-            background: linear-gradient(90deg, var(--frame-dark), var(--frame-color));
-            transform: skewX(-10deg);
-            z-index: 490;
-            opacity: 0;
-        }
-        .frame-pillar-right {
-            position: fixed; top: 0; right: 8vw; width: 3vw; height: 100%;
-            background: linear-gradient(-90deg, var(--frame-dark), var(--frame-color));
-            transform: skewX(10deg);
-            z-index: 490;
-            opacity: 0;
-        }
-
-        /* ====== UI SCREENS (HUD) ====== */
-        .hud-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 600;
-            pointer-events: none;
-            opacity: 0;
-        }
-
-        .screen-glass {
-            position: absolute;
-            background: var(--glass-tint);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(0, 240, 255, 0.1);
-            backdrop-filter: blur(2px);
-            overflow: hidden;
-        }
-        .scan-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 240, 255, 0.05) 51%, transparent 51%);
-            background-size: 100% 4px;
-            pointer-events: none;
-        }
-        .scan-bar {
-            position: absolute; top: -100%; left: 0; width: 100%; height: 20px;
-            background: rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 10px var(--primary-color);
-            animation: scan 3s linear infinite;
-        }
-
-        /* LEFT SCREEN */
-        .screen-left {
-            top: 15%; left: 1%; bottom: 20%; width: 18%;
-            transform: perspective(1000px) rotateY(15deg);
-            border-radius: 10px 0 0 10px;
-            display: flex; flex-direction: column; padding: 15px;
-        }
-        /* RIGHT SCREEN */
-        .screen-right {
-            top: 15%; right: 1%; bottom: 20%; width: 18%;
-            transform: perspective(1000px) rotateY(-15deg);
-            border-radius: 0 10px 10px 0;
-            display: flex; flex-direction: column; padding: 15px;
-        }
-        /* TOP SCREEN (Header) */
-        .screen-top {
-            top: 1%; left: 15%; width: 70%; height: 50px;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-            display: flex; justify-content: space-between; align-items: center; padding: 0 40px; 
-            pointer-events: auto;
-        }
-        
-        /* HUD CONTENTS */
-        .hud-text { font-family: 'Share Tech Mono', monospace; color: var(--primary-color); text-transform: uppercase; }
-        .hud-title { font-size: 1.1rem; border-bottom: 2px solid var(--primary-color); margin-bottom: 10px; padding-bottom: 5px; color: var(--text-main); }
-        
-        .skill-row { margin-bottom: 12px; }
-        .skill-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-main); }
-        .skill-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 4px; }
-        .skill-bar-fill { height: 100%; background: var(--primary-color); width: 0; transition: width 1s; box-shadow: 0 0 5px var(--primary-color); }
-        
-        .nav-link {
-            color: var(--text-main); text-decoration: none; margin: 0 15px; font-weight: bold; position: relative; transition: 0.3s;
-            font-family: 'Share Tech Mono', monospace;
-        }
-        .nav-link:hover { color: var(--primary-color); text-shadow: 0 0 8px var(--primary-color); }
-        .nav-link.active { color: var(--primary-color); }
-        .nav-link.active::after { content:''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: var(--primary-color); }
-
-        /* GitHub Contribution Graph Style */
-        .github-graph {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-top: auto;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .git-dot {
-            width: 100%;
-            aspect-ratio: 1;
-            background: rgba(0, 240, 255, 0.1);
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-        .git-dot:hover {
-            transform: scale(1.2);
-            z-index: 10;
-        }
-
-        /* GitHub Level Colors (0-4) */
-        /* Level 0 uses default background */
-        .git-dot.active-1 { background: rgba(0, 240, 255, 0.2); }
-        .git-dot.active-2 { background: rgba(0, 240, 255, 0.45); box-shadow: 0 0 3px var(--primary-color); }
-        .git-dot.active-3 { background: rgba(0, 240, 255, 0.8); box-shadow: 0 0 6px var(--primary-color); }
-        .git-dot.active-4 { background: #fff; box-shadow: 0 0 10px #fff; border: 1px solid var(--primary-color); }
-
-        /* BATT Display - Header Adjusted */
-        .batt-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            width: auto;
-            min-width: 150px;
-        }
-        .batt-icon {
-            width: 40px; height: 12px;
-            border: 1px solid var(--primary-color);
-            padding: 1px;
-            position: relative;
-            margin-right: 10px;
-        }
-        .batt-icon::after {
-            content: ''; position: absolute; right: -3px; top: 2px; width: 2px; height: 6px; background: var(--primary-color);
-        }
-        .batt-level {
-            height: 100%; background: var(--primary-color); width: 50%;
-            box-shadow: 0 0 5px var(--primary-color);
-            transition: width 0.5s ease;
-        }
-
-        /* ====== MAIN CONTENT AREA ====== */
-        #main-viewport {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: scroll;
-            scroll-behavior: smooth;
-            z-index: 100;
-            padding-top: 100px; 
-            padding-bottom: 150px;
-        }
-        
-        .content-wrapper {
-            width: 50%; 
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        section {
-            background: rgba(10, 20, 30, 0.85);
-            border: 1px solid var(--secondary-color);
-            margin-bottom: 80px;
-            padding: 40px;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(30px);
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        section::before {
-            content: ''; position: absolute; top: -1px; left: -1px; width: 30px; height: 30px;
-            border-top: 3px solid var(--primary-color); border-left: 3px solid var(--primary-color);
-        }
-        section::after {
-            content: ''; position: absolute; bottom: -1px; right: -1px; width: 30px; height: 30px;
-            border-bottom: 3px solid var(--primary-color); border-right: 3px solid var(--primary-color);
-        }
-
-        h2 { 
-            border-left: 5px solid var(--primary-color); 
-            padding-left: 20px; 
-            color: var(--primary-color); 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
-            font-family: 'Share Tech Mono', monospace; 
-        }
-        
-        .log-item { display: flex; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .log-date { width: 100px; color: var(--primary-color); font-weight: bold; font-family: 'Share Tech Mono'; }
-        .log-content { color: #fff; }
-        .log-highlight { color: #fff; font-weight: bold; text-shadow: 0 0 5px var(--alert-color); }
-        .log-date-highlight { width: 100px; color: var(--alert-color); font-weight: bold; font-family: 'Share Tech Mono'; }
-
-        /* ====== HORIZONTAL SCROLL WORKS ====== */
-        .horizontal-scroll {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            padding-bottom: 20px; 
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .card {
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid #444; 
-            padding: 10px; 
-            transition: 0.3s;
-            text-decoration: none; 
-            color: #fff; 
-            display: block;
-            
-            /* 固定幅設定（巨大化防止） */
-            width: 300px;
-            flex: 0 0 300px; 
-            scroll-snap-align: start;
-        }
-        
-        .card:hover { border-color: var(--primary-color); background: rgba(0, 240, 255, 0.1); transform: scale(1.02); }
-
-        .card-img-container {
-            width: 100%;
-            height: 170px; /* 高さ固定 */
-            background: #000; 
-            overflow: hidden;
-            border-bottom: 1px solid #333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-img-container img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; /* 枠内に完全に収める */
-            transition: 0.5s; 
-        }
-        
-        .card:hover img { filter: brightness(1.2); }
-
-        /* ANIMATIONS */
-        @keyframes scan { 0% { top: -100%; } 100% { top: 200%; } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes batt-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-        /* Media Query */
-        @media (max-width: 1200px) {
-            .content-wrapper { width: 60%; }
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- VIDEO BACKGROUND -->
     <video autoplay muted loop id="bg-video" playsinline>
         <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
     </video>
 
-    <!-- START SCREEN -->
     <div id="start-screen">
         <h1 style="letter-spacing: 10px; text-shadow: 0 0 20px var(--primary-color);">NEURAL LINK</h1>
         <button class="start-btn" onclick="initSystem()">INITIATE SEQUENCE</button>
         <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">WARNING: HEAVY DATA TRAFFIC AHEAD</p>
     </div>
 
-    <!-- MECHANICAL FRAMES -->
     <div class="mech-frame frame-top"></div>
     <div class="mech-frame frame-bottom"></div>
     <div class="mech-frame frame-left"></div>
@@ -409,10 +27,8 @@
     <div class="frame-pillar-left"></div>
     <div class="frame-pillar-right"></div>
 
-    <!-- HUD LAYERS -->
     <div class="hud-container">
         
-        <!-- Top Navigation -->
         <div class="screen-glass screen-top">
             <div class="hud-text" style="font-weight: bold;">SYS: ONLINE</div>
             <nav>
@@ -421,7 +37,6 @@
                 <a href="#works" class="nav-link">WORKS</a>
                 <a href="#contact" class="nav-link">COMMS</a>
             </nav>
-            <!-- BATT Area (Dynamic) -->
             <div class="batt-container">
                 <div class="batt-icon">
                     <div class="batt-level" id="batt-bar"></div>
@@ -430,7 +45,6 @@
             </div>
         </div>
 
-        <!-- Left Status Panel -->
         <div class="screen-glass screen-left">
             <div class="scan-line"></div><div class="scan-bar"></div>
             <div class="hud-title">PILOT STATUS</div>
@@ -453,7 +67,6 @@
             </div>
         </div>
 
-        <!-- Right Info Panel -->
         <div class="screen-glass screen-right">
             <div class="scan-line"></div>
             <div class="hud-title">MISSION OBJ.</div>
@@ -465,16 +78,13 @@
 
             <div class="hud-title" style="font-size: 0.9rem;">CODE ACTIVITY</div>
             <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 5px;">@hou-rai3 (LAST 49 DAYS)</div>
-            <!-- GitHub Graph Area -->
             <div class="github-graph" id="git-graph">
-                <!-- JSで生成 -->
-            </div>
+                </div>
             
         </div>
 
     </div>
 
-    <!-- MAIN SCROLLABLE CONTENT -->
     <div id="main-viewport">
         <div class="content-wrapper">
             
@@ -534,7 +144,6 @@
 
             <section id="works">
                 <h2>WORKS</h2>
-                <!-- 横スクロールコンテナ -->
                 <div class="horizontal-scroll">
                     
                     <a href="https://github.com/hou-rai3/battle_with_slime" class="card">
@@ -616,7 +225,6 @@
         </div>
     </div>
 
-    <!-- GSAP for Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
