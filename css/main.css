@@ -21,7 +21,7 @@ body {
     font-family: 'Rajdhani', sans-serif;
     background-color: #000;
     color: var(--text-main);
-    overflow: hidden; /* 起動まではスクロール禁止 */
+    overflow: hidden; /* HTML全体はスクロールさせない */
     height: 100vh;
     width: 100vw;
 }
@@ -149,7 +149,7 @@ body {
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: 600;
-    pointer-events: none;
+    pointer-events: none; /* 重要：HUDはクリックを透過させる */
     opacity: 0;
 }
 
@@ -193,7 +193,7 @@ body {
     top: 1%; left: 15%; width: 70%; height: 50px;
     clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
     display: flex; justify-content: space-between; align-items: center; padding: 0 40px; 
-    pointer-events: auto;
+    pointer-events: auto; /* ヘッダーのリンクはクリック可能にする */
 }
 
 /* HUD CONTENTS */
@@ -233,9 +233,6 @@ body {
     transform: scale(1.2);
     z-index: 10;
 }
-
-/* GitHub Level Colors (0-4) */
-/* Level 0 uses default background */
 .git-dot.active-1 { background: rgba(0, 240, 255, 0.2); }
 .git-dot.active-2 { background: rgba(0, 240, 255, 0.45); box-shadow: 0 0 3px var(--primary-color); }
 .git-dot.active-3 { background: rgba(0, 240, 255, 0.8); box-shadow: 0 0 6px var(--primary-color); }
@@ -268,9 +265,13 @@ body {
 /* ====== MAIN CONTENT AREA ====== */
 #main-viewport {
     height: 100vh;
-    overflow-y: auto; /* ここでスクロールさせる */
+    overflow-y: auto; /* スクロール可能にする */
     position: relative;
     z-index: 10;
+    
+    /* === 修正: ここが最重要。HUDの高さ分だけパディングを入れる === */
+    padding-top: 150px; 
+    padding-bottom: 100px;
 }
 .content-wrapper {
     width: 50%; 

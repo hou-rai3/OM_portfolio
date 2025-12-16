@@ -21,7 +21,10 @@ window.initSystem = function() {
         duration: 1,
         opacity: 0,
         pointerEvents: "none",
-        ease: "power2.inOut"
+        ease: "power2.inOut",
+        onComplete: () => {
+            document.getElementById('start-screen').style.display = 'none';
+        }
     })
     // 2. メカフレームとHUDの展開
     .to(".mech-frame", {
@@ -41,8 +44,6 @@ window.initSystem = function() {
         autoAlpha: 1,
         onComplete: startHudSystems // アニメーション完了後に常時稼働システムを始動
     }, "-=0.5");
-
-    // 効果音があればここで再生（new Audio('sound.mp3').play()）
 };
 
 // ■ HUDシステム（常時稼働系）
@@ -55,7 +56,8 @@ function startHudSystems() {
         onUpdate: function() {
             // 数値をランダムに変動させる演出
             const val = Math.round(this.ratio * 100);
-            document.getElementById("battery-display").innerText = `POWER: ${val}%`;
+            const disp = document.getElementById("battery-display");
+            if(disp) disp.innerText = `POWER: ${val}%`;
         }
     });
 
@@ -74,29 +76,38 @@ function startHudSystems() {
 
 // ■ スクロール連動エフェクト
 function initScrollEffects() {
+    // ScrollTriggerの位置計算をリフレッシュ（display:noneから復帰した際に必要）
+    ScrollTrigger.refresh();
+
     // セクションごとのフェードイン
     const sections = gsap.utils.toArray("section");
     sections.forEach((section) => {
-        gsap.from(section, {
-            scrollTrigger: {
-                trigger: section,
-                start: "top 80%", // 画面の80%の位置に来たら開始
-                toggleActions: "play none none reverse",
-                scroller: "#main-viewport" // 独自のスクロールコンテナを指定する場合
-            },
-            y: 50,
-            opacity: 0,
-            duration: 0.8
-        });
+        gsap.fromTo(section, 
+            { y: 50, opacity: 0 },
+            {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%", // 画面の80%の位置に来たら開始
+                    toggleActions: "play none none reverse",
+                    scroller: "#main-viewport" // 重要：スクロールするコンテナを指定
+                },
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: "power2.out"
+            }
+        );
     });
 
     // WORKSセクションの横スクロール演出（マウスホイールで横に動く）
-    // 注意: CSSで .horizontal-scroll { overflow-x: scroll; } が必要
     const workContainer = document.querySelector(".horizontal-scroll");
     if(workContainer) {
         workContainer.addEventListener("wheel", (evt) => {
-            evt.preventDefault();
-            workContainer.scrollLeft += evt.deltaY;
+            // Shiftキーが押されていない場合のみ横スクロールに変換
+            if (!evt.shiftKey) {
+                evt.preventDefault();
+                workContainer.scrollLeft += evt.deltaY;
+            }
         });
     }
 }
