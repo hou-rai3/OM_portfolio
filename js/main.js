@@ -6,10 +6,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // 初期状態の設定（非表示にしておく）
     gsap.set("#main-viewport", { autoAlpha: 0 });
     gsap.set(".hud-container", { autoAlpha: 0 });
-    gsap.set(".mech-frame", { scale: 1.1, opacity: 0 });
+    gsap.set(".mech-frame", { scale: 1.05, opacity: 0 });
+    // ハッチを外側に配置してから閉じる
+    gsap.set(".frame-top", { yPercent: -120 });
+    gsap.set(".frame-bottom", { yPercent: 120 });
+    gsap.set(".frame-left", { xPercent: -120 });
+    gsap.set(".frame-right", { xPercent: 120 });
+    gsap.set([".frame-pillar-left", ".frame-pillar-right"], { yPercent: -150 });
     
     // GitHubグラフの生成（API取得開始）
     initGitHubGraph();
+    // ホビー折りたたみ設定
+    setupHobbyToggle();
 });
 
 // ■ 起動シーケンス
@@ -27,14 +35,31 @@ window.initSystem = function() {
             if(startScreen) startScreen.style.display = 'none';
         }
     })
-    // 2. メカフレームとHUDの展開
+    // 2. メカフレームとHUDの展開（閉まるハッチ演出）
+    .to([".frame-top", ".frame-bottom"], {
+        duration: 1.1,
+        yPercent: 0,
+        opacity: 1,
+        ease: "expo.out"
+    }, "-=0.3")
+    .to([".frame-left", ".frame-right"], {
+        duration: 1.0,
+        xPercent: 0,
+        opacity: 1,
+        ease: "expo.out"
+    }, "-=0.9")
+    .to([".frame-pillar-left", ".frame-pillar-right"], {
+        duration: 0.9,
+        yPercent: 0,
+        opacity: 1,
+        ease: "expo.out"
+    }, "-=0.6")
     .to(".mech-frame", {
-        duration: 1.5,
+        duration: 0.6,
         scale: 1,
         opacity: 1,
-        stagger: 0.1,
-        ease: "elastic.out(1, 0.7)"
-    }, "-=0.5")
+        ease: "power2.out"
+    }, "<")
     .to(".hud-container", {
         duration: 0.5,
         autoAlpha: 1
@@ -164,4 +189,33 @@ function generateDummyGraph(container) {
         if (Math.random() > 0.7) dot.classList.add('active-1');
         container.appendChild(dot);
     }
+}
+
+// ■ Hobby折りたたみ
+function setupHobbyToggle() {
+    const toggle = document.getElementById("hobby-toggle");
+    const panel = document.getElementById("hobby-panel");
+    if (!toggle || !panel) return;
+
+    const open = () => {
+        panel.classList.remove("is-collapsed");
+        panel.classList.add("is-open");
+        toggle.setAttribute("aria-expanded", "true");
+        toggle.textContent = "HOBBYを閉じる";
+    };
+
+    const close = () => {
+        panel.classList.remove("is-open");
+        panel.classList.add("is-collapsed");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.textContent = "HOBBYを開く";
+    };
+
+    let isOpen = false;
+    close();
+
+    toggle.addEventListener("click", () => {
+        isOpen ? close() : open();
+        isOpen = !isOpen;
+    });
 }
