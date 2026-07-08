@@ -3,341 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINATO // MECH INTERFACE</title>
-    <meta name="description" content="Minato Portfolio - Mech Cockpit Interface">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Minato Portfolio</title>
+    <meta name="description" content="Minato Okabe portfolio site">
     <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
+<body id="root">
+    <nav id="global_nav" class="global-nav" aria-label="ページ内メニュー">
+        <button class="nav-hit-area" type="button" aria-label="メニューを開く"></button>
+        <ul class="global_nav_item_top">
+            <li class="global_nav_item"><a href="#home" data-jump="home">Home</a></li>
+            <li class="global_nav_item"><a href="#about" data-jump="about">About me</a></li>
+            <li class="global_nav_item"><a href="#history" data-jump="history">History</a></li>
+            <li class="global_nav_item"><a href="#works" data-jump="works">Works</a></li>
+            <li class="global_nav_item"><a href="#contact" data-jump="contact">Contact</a></li>
+        </ul>
+    </nav>
+    <div class="global_section_bar" aria-hidden="true"></div>
 
-    <video autoplay muted loop id="bg-video" playsinline>
-        <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
-    </video>
+    <main id="page">
+        <header id="home" class="container header" data-index="0">
+            <h1 class="heading-logo" aria-label="Minato Portfolio">
+                <span>Minato</span>
+                <small>Portfolio</small>
+            </h1>
+        </header>
 
-    <div id="start-screen">
-        <h1 style="letter-spacing: 10px; text-shadow: 0 0 20px var(--primary-color);">NEURAL LINK</h1>
-        <button class="start-btn" onclick="initSystem()">INITIATE SEQUENCE</button>
-        <!-- <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.7;">WARNING: HEAVY DATA TRAFFIC AHEAD</p> -->
-    </div>
+        <section id="about" class="container about" data-index="1">
+            <div class="about-slanting-background-top" aria-hidden="true"></div>
+            <div class="about-slanting-background-bottom" aria-hidden="true"></div>
+            <h2 class="section_title"><a href="#about" data-jump="about">About me</a></h2>
 
-    <div class="mech-frame frame-top"></div>
-    <div class="mech-frame frame-bottom"></div>
-    <div class="mech-frame frame-left"></div>
-    <div class="mech-frame frame-right"></div>
-    <div class="frame-pillar-left"></div>
-    <div class="frame-pillar-right"></div>
-
-    <div class="hud-container">
-        <div class="screen-glass screen-top">
-            <div class="hud-text" style="font-weight: bold;">SYS: ONLINE</div>
-            <nav>
-                <a href="#about" class="nav-link">ABOUT</a>
-                <a href="#career" class="nav-link">CARRIER</a>
-                <a href="#works" class="nav-link">WORKS</a>
-                <a href="#contact" class="nav-link">COMMS</a>
-            </nav>
-            <div class="batt-container">
-                <div class="batt-icon">
-                    <div class="batt-level" id="batt-bar"></div>
-                </div>
-                <span class="hud-text" id="battery-display" style="font-size: 0.8rem;">LOADING...</span>
-            </div>
-        </div>
-
-        <div class="screen-glass screen-left">
-            <div class="scan-line"></div><div class="scan-bar"></div>
-            <div class="hud-title">PILOT STATUS</div>
-            <div class="skill-row">
-                <div class="skill-label"><span>SYNC RATE</span><span>98%</span></div>
-                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 98%;"></div></div>
-            </div>
-            <div class="hud-title" style="margin-top: 20px;">SKILLS</div>
-            <div class="skill-row">
-                <div class="skill-label"><span>PYTHON / AI</span><span>LV.2</span></div>
-                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 80%;"></div></div>
-            </div>
-            <div class="skill-row">
-                <div class="skill-label"><span>ROBOTICS</span><span>LV.3</span></div>
-                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 95%;"></div></div>
-            </div>
-            <div class="skill-row">
-                <div class="skill-label"><span>LEADERSHIP</span><span>MAX</span></div>
-                <div class="skill-bar-bg"><div class="skill-bar-fill" style="width: 100%; background: #ffaa00;"></div></div>
-            </div>
-        </div>
-
-        <div class="screen-glass screen-right">
-            <div class="scan-line"></div>
-            <div class="hud-title">MISSION OBJ.</div>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.5; color: #ccc; margin-bottom: 20px;">
-                <li>> WIN ROBOCON</li>
-                <li>> OPTIMIZE CODE</li>
-                <li>> LEAD TEAM</li>
-            </ul>
-
-            <div class="hud-title" style="font-size: 0.9rem;">CODE ACTIVITY</div>
-            <div style="font-size: 0.7rem; color: #aaa; margin-bottom: 5px;">@hou-rai3 (LAST 49 DAYS)</div>
-            <div class="github-graph" id="git-graph"></div>
-        </div>
-    </div>
-
-    <div id="main-viewport">
-        <div class="content-wrapper">
-            
-            <section id="hero" style="text-align: center; border: none; background: transparent; box-shadow: none;">
-                <h1 style="font-size: 4rem; margin: 0; text-shadow: 0 0 20px var(--primary-color); font-family: 'Share Tech Mono';">MINATO PORTFORIO</h1>
-                <p style="letter-spacing: 5px; color: var(--primary-color);">OMUCT // ROBOT CLUB LEADER</p>
-            </section>
-
-            <section id="about">
-                <h2>ABOUT</h2> 
-                <p>
-                    <strong>Name:</strong> 岡部昊斗 (Minato Okabe)<br>
-                    <strong>Affiliation:</strong> 大阪公立大学工業高等専門学校 ろぼっと倶楽部<br><br>
-                    2023年入学。ろぼっと倶楽部に所属し、全国大会優勝を目標に活動中。<br>
-                    1・2年は制御班としてロボットのプログラムを担当。<br>
-                    3年からはチームリーダーを務め、マネジメントによりチームを牽引。
-                </p>
-            </section>
-
-            <section id="career">
-                <h2>CAREER</h2>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div class="log-item">
-                        <span class="log-date">2023.04</span>
-                        <span class="log-content">大阪公立大学工業高等専門学校 入学</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2023.04</span>
-                        <span class="log-content">ろぼっと倶楽部 入部</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2023.12</span>
-                        <span class="log-content">廃炉創造ロボコン 協賛企業特別賞 受賞</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2024.03</span>
-                        <span class="log-content">関西春ロボコン2024 出場</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2024.10</span>
-                        <span class="log-content">高専ロボコン2024 近畿地区大会 準優勝</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date-highlight">2024.11</span>
-                        <span class="log-highlight">高専ロボコン2024 全国大会 優勝</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2025.03</span>
-                        <span class="log-content">関西春ロボコン2025 決勝リーグ出場</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2025.09</span>
-                        <span class="log-content">高専ロボコン2025 近畿地区大会敗退</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2026.03</span>
-                        <span class="log-content">関西春ロボコン2026 出場</span>
-                    </div>
-                    <div class="log-item">
-                        <span class="log-date">2026.03</span>
-                        <span class="log-highlight">DISCO ROBOT CONTEST 2026 制御技術賞 受賞</span>
-                    </div>
-                    <div class="log-item" style="border-bottom: none;">
-                        <span class="log-date" style="color: #888;">高専ロボコン2026 近畿地区大会...</span>
-                        
-                        <span class="log-content" style="color: #aaa;">Coming Soon...</span>
-                    </div>
-                </div>
-            </section>
-
-            <section id="works">
-                <h2>WORKS</h2>
-                <div class="horizontal-scroll">
-                    <a href="https://kansai-harurobo.org/" class="card">
-                        <div class="card-img-container"><img src="images/10manyen.png" alt="Robot"></div>
-                        <h3>DISCO ROBOT CONTEST 2026</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">制御技術賞</p>
-                    </a>
-                    <a href="https://kansai-harurobo.org/" class="card">
-                        <div class="card-img-container"><img src="images/hing.png" alt="Robot"></div>
-                        <h3>関西春ロボコン2024</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">ロボット制御</p>
-                    </a>
-                    
-                    <a href="https://robotclub.sakigake-robo.com/" class="card">
-                        <div class="card-img-container"><img src="images/himari.png" alt="Robot"></div>
-                        <h3>NHK高専ロボコン2024</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">射出ロボット制御</p>
-                    </a>
-                    
-                    <a href="https://kansai-harurobo.org/" class="card">
-                        <div class="card-img-container"><img src="images/greathing.png" alt="Robot"></div>
-                        <h3>関西春ロボコン2025</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">チームリーダー</p>
-                    </a>
-                    
-                    <a href="https://official-robocon.com/kosen/" class="card">
-                        <div class="card-img-container"><img src="images/isana.png" alt="Robot"></div>
-                        <h3>NHK高専ロボコン2025</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">チームリーダー</p>
-                    </a>
-                    <a href="https://github.com/hou-rai3/battle_with_slime" class="card">
-                        <div class="card-img-container"><img src="images/slime.png" alt="Game"></div>
-                        <h3>VS 最強スライム</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">高難易度シミュレーションゲーム</p>
-                    </a>
-                    
-                    <a href="https://github.com/hou-rai3/Pose_Estimation" class="card">
-                        <div class="card-img-container"><img src="images/kousensai4.png" alt="Dungeon"></div>
-                        <h3>没入型ダンジョン探索</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">君の声と動きで攻略せよ</p>
-                    </a>
-                    
-                    <a href="https://github.com/hou-rai3/steering_simulator_ultimate-edition" class="card">
-                        <div class="card-img-container"><img src="images/steer.png" alt="Sim"></div>
-                        <h3>4輪独立ステアシミュレーター</h3>
-                        <p style="font-size: 0.8rem; color: #ccc;">ロボット挙動物理演算</p>
-                    </a>
-                    
-                    
+            <div class="about_wrapper">
+                <div class="profile_icon" aria-label="プロフィール画像"></div>
+                <div class="name_circle">
+                    <span class="name_jp">みなと</span>
+                    <span class="name_en">Minato</span>
                 </div>
 
-                <div class="hobby-header">
-                    <h3 style="margin-top: 50px; color: var(--primary-color); letter-spacing: 3px; font-family: 'Share Tech Mono';">CREATIONS // 作ったもの</h3>
-                    <button class="collapse-btn" id="hobby-toggle" aria-expanded="false">HOBBYを開く</button>
+                <div class="about_my_name">
+                    <div class="school_info">
+                        <p>Osaka Metropolitan University College of Technology</p>
+                        <p>Robotics / Web / Creative coding</p>
+                    </div>
+                    <div class="main_name">Okabe Minato</div>
+                    <div class="skill_keywords">
+                        <span>HTML</span>
+                        <span>CSS</span>
+                        <span>JavaScript</span>
+                        <span>Python</span>
+                        <span>C++</span>
+                        <span>Robotics</span>
+                        <span>Design</span>
+                    </div>
                 </div>
-                <div class="works-grid collapsible is-collapsed" id="hobby-panel">
-                    <!-- <div class="work-card">
-                        <div class="work-head">
-                            <h3>丹瑾に龍髭パイを食べさせるだけのゲーム</h3>
-                            <span class="badge">GAME</span>
-                        </div>
-                        <div class="work-media">
-                            <img src="images/Tankin_game.jpg" alt="丹瑾ゲーム">
-                        </div>
-                        <p>丹瑾に龍髭パイを投げつけて幸せそうな丹瑾を眺めるだけのシンプルゲーム。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://hou-rai3.github.io/danjin-game/" target="_blank" rel="noopener">GitHub Pages</a>
-                        </div>
-                    </div>
+            </div>
 
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>臨場感MAXのハンドル型コントローラー</h3>
-                            <span class="badge">HARDWARE</span>
-                        </div>
-                        <div class="work-media">
-                            <video src="images/handle_controller_demo.mp4" controls muted></video>
-                        </div>
-                        <p>自転車ハンドルとスマホを組み合わせたコントローラー。傾けるとバイクが動くプロトタイプ。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://x.com/manji_1001_0111/status/2010307750824403296" target="_blank" rel="noopener">詳細を見る</a>
-                        </div>
-                    </div>
+            <button class="scroll-arrow" type="button" data-next aria-label="次の項目へ"></button>
+        </section>
 
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>鳴潮 丹瑾推し用自己紹介カードメーカー</h3>
-                            <span class="badge">WEB TOOL</span>
-                        </div>
-                        <div class="work-media">
-                            <img src="images/danjin-card-fixed.gif" alt="丹瑾カードメーカー">
-                        </div>
-                        <p>丹瑾カラーの自己紹介カードをブラウザで生成。プレイ端末や時間帯など必要情報を網羅。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://hou-rai3.github.io/danjin-card/" target="_blank" rel="noopener">GitHub Pages</a>
-                        </div>
-                    </div>
+        <section id="history" class="container history" data-index="2">
+            <h2 class="section_title"><a href="#history" data-jump="history">History</a></h2>
+            <div class="history_wrapper">
+                <div class="history_time_line" aria-hidden="true"></div>
+                <div id="history-list"></div>
+            </div>
+            <button class="scroll-arrow" type="button" data-next aria-label="次の項目へ"></button>
+        </section>
 
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>丹瑾チャットボット</h3>
-                            <span class="badge">BOT</span>
-                        </div>
-                        <div class="work-media">
-                            <video src="images/Clipchamp_12.mp4" controls muted></video>
-                        </div>
-                        <p>Gemini APIを使った丹瑾風チャットボット。連絡いただいた方に個別で案内中。</p>
-                        <div class="work-actions">
-                            <span class="work-note">招待ベースで提供中</span>
-                        </div>
-                    </div>
+        <section id="works" class="container works" data-index="3">
+            <div class="works_background">
+                <h2 class="section_title"><a href="#works" data-jump="works">Works</a></h2>
+                <div class="works_wrapper" id="works-list"></div>
+            </div>
+            <button class="scroll-arrow" type="button" data-next aria-label="次の項目へ"></button>
+        </section>
 
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>MDFレーザー加工丹瑾</h3>
-                            <span class="badge">MAKING</span>
-                        </div>
-                        <div class="work-media">
-                            <img src="images/Tankin_laser.jpg" alt="MDFレーザー加工丹瑾">
-                        </div>
-                        <p>レーザー加工機で作った丹瑾グッズ第1弾。再調整してリベンジ予定。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://x.com/manji_1001_0111/status/2014661584594075704/photo/1" target="_blank" rel="noopener">当時のポスト</a>
-                        </div>
-                    </div>
+        <section id="contact" class="container contact" data-index="4">
+            <h2 class="section_title"><a href="#contact" data-jump="contact">Contact</a></h2>
+            <div class="contact_wrapper">
+                <a class="contact_icon_box" href="mailto:om.repository@gmail.com">
+                    <span class="contact_icon">Mail</span>
+                    <p class="contact_icon_text">om.repository@gmail.com</p>
+                </a>
+                <a class="contact_icon_box" href="https://github.com/hou-rai3" target="_blank" rel="noopener">
+                    <span class="contact_icon">Git</span>
+                    <p class="contact_icon_text">github.com/hou-rai3</p>
+                </a>
+            </div>
+            <button class="scroll-arrow up" type="button" data-jump="home" aria-label="最初の項目へ"></button>
+        </section>
+    </main>
 
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>鳴潮 モーニエ推し用自己紹介カードメーカー</h3>
-                            <span class="badge">WEB TOOL</span>
-                        </div>
-                        <div class="work-media">
-                            <video src="images/mournier_card_HQ_1769350461022.mp4" controls muted></video>
-                        </div>
-                        <p>モーニエをテーマにした自己紹介カードメーカー。端末・時間帯・VC可否を一括入力。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://hou-rai3.github.io/mornye-card/" target="_blank" rel="noopener">GitHub Pages</a>
-                        </div>
-                    </div>
-
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>鳴潮 自己紹介カードメーカー</h3>
-                            <span class="badge">WEB TOOL</span>
-                        </div>
-                        <div class="work-media">
-                            <img src="images/hoshikago.png" alt="鳴潮自己紹介カード">
-                        </div>
-                        <p>スタートーチ学園風フレームで自己紹介カードを作れるツール。プレイ環境や時間帯を整理。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://hou-rai3.github.io/cards/" target="_blank" rel="noopener">サイトを見る</a>
-                        </div>
-                    </div>
-
-                    <div class="work-card">
-                        <div class="work-head">
-                            <h3>鳴潮スコア自動計算ツール</h3>
-                            <span class="badge">UTILITY</span>
-                        </div>
-                        <div class="work-media">
-                            <img src="images/Wuthering-Waves-score.png" alt="鳴潮スコア計算ツール">
-                        </div>
-                        <p>スクショをペーストするだけで音骸スコアを自動算出するツール。試作版。</p>
-                        <div class="work-actions">
-                            <a class="work-link" href="https://hou-rai3.github.io/Wuthering-Waves-score/" target="_blank" rel="noopener">試作を見る</a>
-                        </div>
-                    </div> -->
-                </div>
-            </section>
-
-            <section id="contact">
-                <h2>COMMS</h2> 
-                <p>お問い合わせはこちらから。</p>
-                <a href="mailto:om.repository@gmail.com" style="display: inline-block; padding: 10px 20px; border: 1px solid var(--primary-color); color: var(--primary-color); text-decoration: none; margin-top: 20px; font-weight: bold; background: rgba(0,240,255,0.1);">SEND TRANSMISSION</a>
-            </section>
-
-            <footer style="text-align: center; margin-bottom: 100px; color: #555; font-size: 0.8rem;">
-                &copy; 2025 MINATO OKABE. SYSTEM VER 3.12
-            </footer>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    
     <script src="js/main.js"></script>
-    
 </body>
 </html>
