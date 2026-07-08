@@ -1,14 +1,36 @@
 const works = [
     {
-        title: "高専ロボコン",
+        title: "高専ロボコン2024",
         tag: "Robocon",
         category: "Robocon",
-        year: "2024 - 2025",
-        role: "制御 / 機体調整 / チーム開発",
+        year: "2024",
+        role: "制御",
+        image: "images/himari.png",
+        url: "https://official-robocon.com/kosen/",
+        description: "Aチーム「銀火」のR1の機構制御を担当。",
+        details: ["100点着地の安定動作", "R2のエリア3への射出", "地区大会準優勝・全国大会優勝"],
+    },
+     {
+        title: "高専ロボコン2025",
+        tag: "Robocon",
+        category: "Robocon",
+        year: "2025",
+        role: "チームリーダー",
         image: "images/isana.png",
         url: "https://official-robocon.com/kosen/",
-        description: "競技ルールに合わせて、動作の安定性と再現性を重視して制作しました。",
-        details: ["機体の動作確認と改善", "制御プログラムの調整", "試走結果をもとにしたチーム内共有"],
+        description: "Aチーム「勇華」でチームリーダーとしてプロジェクトマネジメントを担当。",
+        details: ["", "", ""],
+    },
+     {
+        title: "高専ロボコン2026",
+        tag: "Robocon",
+        category: "Robocon",
+        year: "2026",
+        role: "チームリーダー",
+        image: "images/none.png",
+        url: "https://official-robocon.com/kosen/",
+        description: "Aチーム「???」でチームリーダーとしてプロジェクトマネジメントを担当。",
+        details: ["10月11日に近畿地区大会", "11月15日に全国大会", ""],
     },
     {
         title: "春ロボコン",
@@ -83,7 +105,6 @@ const workIndexes = Object.fromEntries(workCategories.map((category) => [categor
 
 let activeIndex = 0;
 let activeWorkCategory = workCategories[0];
-let workTransitionTimer = null;
 let isPageMoving = false;
 
 function getCurrentWorks() {
@@ -96,33 +117,16 @@ function moveWork(direction) {
 
     const nextIndex = (workIndexes[activeWorkCategory] + direction + currentWorks.length) % currentWorks.length;
     workIndexes[activeWorkCategory] = nextIndex;
-    updateFocusedWork(direction);
+    updateWorkTrack();
 }
 
-function updateFocusedWork(direction) {
-    const currentWorks = getCurrentWorks();
+function updateWorkTrack() {
     const currentIndex = workIndexes[activeWorkCategory];
-    const work = currentWorks[currentIndex];
-    const focus = document.querySelector(".work_focus");
+    const track = document.querySelector(".works_track");
 
-    if (!focus || !work) {
-        renderWorks();
-        return;
+    if (track) {
+        track.style.transform = `translate3d(${-100 * currentIndex}%, 0, 0)`;
     }
-
-    window.clearTimeout(workTransitionTimer);
-    focus.classList.remove("is-entering", "from-left", "from-right");
-    focus.classList.add("is-leaving", direction > 0 ? "to-left" : "to-right");
-
-    workTransitionTimer = window.setTimeout(() => {
-        focus.innerHTML = getWorkMarkup(work, currentIndex, currentWorks.length);
-        focus.classList.remove("is-leaving", "to-left", "to-right");
-        focus.classList.add("is-entering", direction > 0 ? "from-right" : "from-left");
-
-        window.requestAnimationFrame(() => {
-            focus.classList.remove("is-entering", "from-left", "from-right");
-        });
-    }, 160);
 }
 
 function renderWorks() {
@@ -131,7 +135,7 @@ function renderWorks() {
 
     const currentWorks = getCurrentWorks();
     const currentIndex = Math.min(workIndexes[activeWorkCategory], currentWorks.length - 1);
-    const work = currentWorks[currentIndex];
+    workIndexes[activeWorkCategory] = currentIndex;
 
     wrapper.innerHTML = "";
 
@@ -160,7 +164,11 @@ function renderWorks() {
     carousel.className = "works_carousel";
     carousel.innerHTML = `
         <button class="work_nav prev" type="button" aria-label="前の制作物へ"></button>
-        <article class="work_focus">${getWorkMarkup(work, currentIndex, currentWorks.length)}</article>
+        <div class="works_viewport">
+            <div class="works_track">
+                ${currentWorks.map((work, index) => `<article class="work_focus">${getWorkMarkup(work, index, currentWorks.length)}</article>`).join("")}
+            </div>
+        </div>
         <button class="work_nav next" type="button" aria-label="次の制作物へ"></button>
     `;
 
@@ -170,6 +178,7 @@ function renderWorks() {
     wrapper.appendChild(tabList);
     wrapper.appendChild(intro);
     wrapper.appendChild(carousel);
+    updateWorkTrack();
 }
 
 function getWorkMarkup(work, currentIndex, total) {
@@ -181,7 +190,7 @@ function getWorkMarkup(work, currentIndex, total) {
             <div class="work_meta">
                 <span class="work_tag">${work.tag}</span>
                 <span>${work.year}</span>
-                <span>${currentIndex + 1} / ${total}</span>
+                    <span class="works_counter">${currentIndex + 1} / ${total}</span>
             </div>
             <h3 class="work_content_name">${work.title}</h3>
             <p class="work_role">${work.role}</p>
@@ -236,10 +245,6 @@ function setupNavigation() {
             goToSection(getSectionIndex(link.dataset.jump));
             nav?.classList.remove("motion");
         });
-    });
-
-    document.querySelectorAll("[data-next]").forEach((button) => {
-        button.addEventListener("click", () => goToSection(activeIndex + 1));
     });
 
     const navHitArea = document.querySelector(".nav-hit-area");
