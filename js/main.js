@@ -100,26 +100,15 @@ const works = [
     },
     {
         title: "Pose Estimation",
-        tag: "AI",
+        tag: "game",
         category: "Other works",
         year: "2025",
         role: "Prototype / Interaction",
         image: "images/kousensai4.png",
         url: "https://github.com/hou-rai3/Pose_Estimation",
-        description: "人の動きや入力を使って、画面内の体験が変化するインタラクティブ作品です。",
+        description: "人の剣を振る動作や音声を使用してゲーム内のキャラクターを操作してダンジョンを攻略するゲームです。",
         details: ["入力情報の取得", "画面演出との連携", "展示向けの調整"],
-    },
-    {
-        title: "Card Maker",
-        tag: "Web",
-        category: "Other works",
-        year: "2025",
-        role: "Frontend / Generator",
-        image: "images/danjin-card-fixed.gif",
-        url: "https://hou-rai3.github.io/danjin-card/",
-        description: "入力した情報から、ブラウザ上でカード画像を生成できるWebツールです。",
-        details: ["フォーム入力の整理", "カード表示の調整", "公開ページとして実装"],
-    },
+    }
 ];
 
 const histories = [
