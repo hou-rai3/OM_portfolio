@@ -1,50 +1,72 @@
-# PORTFOLIO
-
-[![Pilot Status](https://img.shields.io/badge/STATUS-ONLINE-00f0ff?style=for-the-badge&logo=probot)](https://github.com/hou-rai3)
-[![System](https://img.shields.io/badge/SYSTEM-VER_3.12-00a8ff?style=for-the-badge)](https://github.com/hou-rai3)
-
-**"NEURAL LINK ESTABLISHED."**
-
+# Minato Portfolio
 大阪公立大学工業高等専門学校 岡部昊斗のポートフォリオサイトです。
 [こちら](https://hou-rai3.github.io/OM_portfolio/)からご覧になれます。
-## System Gimmicks (技術的な小ネタ)
 
-没入感とかっこよさを高めるためのギミックを搭載しています。
+## Sections
 
-### 1. Startup Sequence (GSAP Animation)
-ページロード時に発動するシステム起動シーケンスです。
-- **GSAP (GreenSock Animation Platform)** を使用し、Timeline制御による精密なアニメーションを実装。
-- メカニカルなハッチの開放、HUDの展開、ガラスの反射エフェクトなどを順番に実行し、コックピットに乗り込むような雰囲気を演出しています。
+- Home
+- About me
+- History
+- Works
+- Contact
 
+各項目は別ページへ遷移せず、同じページ内で切り替わります。
 
-### 2. Live GitHub Activity Graph
-HUD右側の `CODE ACTIVITY` パネルには、実際のGitHub活動状況が表示されます。
-- 外部APIを使用し、私 `@hou-rai3` の直近49日間のコントリビューションデータを動的にフェッチ。
-- 取得したデータを、GitHub純正の色ではなく、サイトのテーマカラーであるシアンブルーに合わせてCSSクラスでマッピングし直し、HUDのデザインに統合しています。
+## Features
 
-### 3. Immersion Background
-- 背景には没入感を高める環境映像を配置し、CSSフィルタで彩度と明度を調整してUIの視認性を確保しています。
-- 今後はロボコンの動画に差し替えたいと考えています。
+- 右端の三角形ナビゲーション
+  - ホバーまたはクリックで展開
+  - `Home / About me / History / Works / Contact` に移動
+- ホイール、矢印キー、PageUp/PageDown によるセクション移動
+- Works のカテゴリ切り替え
+  - `Robocon`
+  - `Other works`
+- Works のカルーセル表示
+  - 中央に1件ずつ表示
+  - 左右ボタンで、横につながった帯が移動するように切り替え
+  - 画像は全体が見えるように表示
+- フレームワークなしの静的サイト
 
-## Tech Stack
+## Editing Works
 
-フレームワークを使わず、軽量かつ保守性の高い構成で構築されています。
+制作物は [js/main.js](js/main.js) の `works` 配列で管理しています。
 
-- **Core:** HTML5, CSS3 (Variables used for theming)
-- **Script:** Vanilla JavaScript (ES6+)
-- **Animation:** [GSAP 3.12](https://gsap.com/) (ScrollTrigger included)
-- **API:**
-  - GitHub Contributions API (3rd party)
-  - Navigator Battery API
+```js
+{
+    title: "作品名",
+    tag: "分類ラベル",
+    category: "Robocon",
+    year: "2025",
+    role: "担当内容",
+    image: "images/example.png",
+    url: "https://example.com",
+    description: "作品の説明",
+    details: ["詳細1", "詳細2", "詳細3"],
+}
+```
 
-## roject Structure
+`category` は現在、以下のどちらかを指定します。
+
+- `Robocon`
+- `Other works`
+
+画像は `images/` に置き、`image` にパスを書きます。
+
+## Files
 
 ```text
 .
-├── index.html      # メイン構造・JSロジック
-├── css       # デザイン・装飾（レスポンシブ対応）
-│    └──main.css
-├── js       # デザイン・装飾（レスポンシブ対応）
-│    └──main.js
-├── images/         # 制作物サムネイル画像
-└── README.md       # ドキュメント
+├── index.html
+├── css/
+│   └── main.css
+├── js/
+│   └── main.js
+├── images/
+└── README.md
+```
+
+## Tech
+
+- HTML
+- CSS
+- Vanilla JavaScript
