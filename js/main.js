@@ -38,7 +38,7 @@ const works = [
         category: "Robocon",
         year: "2026",
         role: "チームリーダー",
-        image: "images/2026-drc-1.png",
+        image: "images/2026-drc-1.jpg",
         url: "https://kansai-harurobo.org/",
         description: "チームリーダーとしてプロジェクトマネジメントを担当。",
         details: ["圧倒的な速度", "自動でターゲットをロック", "制御技術賞"],
