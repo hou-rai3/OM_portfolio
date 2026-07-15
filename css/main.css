@@ -175,10 +175,10 @@ a.is-active::after {
 
 .global_section_bar {
     position: fixed;
-    top: 10vh;
+    top: 9vh;
     left: 0;
     width: 18px;
-    height: 14vh;
+    height: clamp(3.2rem, 4vw, 6.5rem);
     background: var(--dark-base);
     z-index: 20;
 }
@@ -352,8 +352,9 @@ a.is-active::after {
 
 .history_circle_box {
     display: inline-grid;
-    width: 3vh;
-    padding-left: calc(5vw - (3vh / 2) - 1px);
+    width: 10vw;
+    padding-left: 0;
+    justify-items: center;
     vertical-align: middle;
 }
 
@@ -367,11 +368,12 @@ a.is-active::after {
 
 .history_date {
     display: inline-grid;
-    width: 8vw;
-    padding-left: 1vw;
+    width: 12vw;
+    padding-left: 0.8vw;
     color: var(--accent);
     font-size: clamp(1.1rem, 1vw, 1.6rem);
     font-weight: 800;
+    white-space: nowrap;
 }
 
 .works {
@@ -716,7 +718,7 @@ a.is-active::after {
     }
 
     .history_text {
-        width: 75vw;
+        width: 69vw;
         font-size: 1.2rem;
     }
 
@@ -724,11 +726,12 @@ a.is-active::after {
         position: absolute;
         top: 2.4vh;
         left: calc(100% - 1.5vh - 1px);
+        width: 3vh;
         padding-left: 0;
     }
 
     .history_date {
-        width: 9vw;
+        width: 18vw;
         padding-left: 0;
         text-align: right;
         font-size: 1rem;

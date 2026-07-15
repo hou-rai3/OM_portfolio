@@ -112,10 +112,13 @@ const works = [
 ];
 
 const histories = [
-    { date: "2023", title: "大阪公立大学工業高等専門学校へ入学。ろぼっと倶楽部へ入部。", text: "制御、機体調整、チームでの制作フローを経験。" },
-    { date: "2024", title: "ロボコン", text: "高専ロボコン全国優勝" },
-    { date: "2025", title: "ロボコン", text: "チームリーダーに就任。辛酸" },
-    { date: "2026", title: "ロボコン", text: "DRC制御技術賞。高専ロボコン全国優勝する予定" },
+    // { date: "", title: "", text: "" },
+    { date: "2023年4月", title: "大阪公立大学工業高等専門学校へ入学", text: "ろぼっと倶楽部へ入部" },
+    { date: "2023年12月", title: "廃炉創造ロボコン", text: "協賛企業特別賞" },
+    { date: "2024年10月", title: "高専ロボコン2024近畿地区大会", text: "準優勝,審査員推薦により全国大会へ" },
+    { date: "2024年11月", title: "高専ロボコン2024全国大会", text: "全国優勝" },
+    { date: "2026年3月", title: "DISCO ROBOT CONTEST 2026", text: "制御技術賞" },
+    { date: "2026年10月", title: "高専ロボコン", text: "coming soon..." },
 ];
 
 const scrollRoot = document.getElementById("page");
