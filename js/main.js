@@ -121,6 +121,14 @@ const histories = [
     { date: "2026年10月", title: "高専ロボコン", text: "coming soon..." },
 ];
 
+// Add, remove, or reorder paths here to edit the History background playlist.
+const historyVideoPlaylist = [
+    "images/",
+    "images/",
+    "images/",
+];
+const historyVideoCrossfadeMs = 1200;
+
 const scrollRoot = document.getElementById("page");
 const nav = document.getElementById("global_nav");
 const sections = Array.from(document.querySelectorAll("#page > .container"));
@@ -240,8 +248,88 @@ function renderHistory() {
     `).join("");
 }
 
+function setupHistoryVideoPlaylist() {
+    const players = Array.from(document.querySelectorAll(".history_slit_video"));
+    if (players.length < 2 || historyVideoPlaylist.length === 0) return;
+
+    document.documentElement.style.setProperty("--history-video-crossfade", `${historyVideoCrossfadeMs}ms`);
+
+    let activePlayerIndex = 0;
+    let activePlaylistIndex = 0;
+    let isCrossfading = false;
+
+    const preparePlayer = (player, playlistIndex) => {
+        player.src = historyVideoPlaylist[playlistIndex];
+        player.dataset.playlistIndex = String(playlistIndex);
+        player.load();
+    };
+
+    const playVideo = (player) => {
+        player.play()?.catch(() => {
+            // Muted autoplay may wait for the first user interaction.
+        });
+    };
+
+    const crossfadeToNext = () => {
+        if (isCrossfading || historyVideoPlaylist.length < 2) return;
+        isCrossfading = true;
+
+        const currentPlayer = players[activePlayerIndex];
+        const nextPlayerIndex = (activePlayerIndex + 1) % players.length;
+        const nextPlayer = players[nextPlayerIndex];
+        const nextPlaylistIndex = (activePlaylistIndex + 1) % historyVideoPlaylist.length;
+
+        if (Number(nextPlayer.dataset.playlistIndex) !== nextPlaylistIndex) {
+            preparePlayer(nextPlayer, nextPlaylistIndex);
+        }
+
+        const revealNext = () => {
+            nextPlayer.currentTime = 0;
+            playVideo(nextPlayer);
+            nextPlayer.classList.add("is-active");
+            currentPlayer.classList.remove("is-active");
+
+            activePlayerIndex = nextPlayerIndex;
+            activePlaylistIndex = nextPlaylistIndex;
+
+            window.setTimeout(() => {
+                currentPlayer.pause();
+                const preloadIndex = (activePlaylistIndex + 1) % historyVideoPlaylist.length;
+                preparePlayer(currentPlayer, preloadIndex);
+                isCrossfading = false;
+            }, historyVideoCrossfadeMs);
+        };
+
+        if (nextPlayer.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            revealNext();
+        } else {
+            nextPlayer.addEventListener("canplay", revealNext, { once: true });
+        }
+    };
+
+    players.forEach((player) => {
+        player.addEventListener("timeupdate", () => {
+            if (player !== players[activePlayerIndex] || !Number.isFinite(player.duration)) return;
+            const remainingSeconds = player.duration - player.currentTime;
+            if (remainingSeconds <= historyVideoCrossfadeMs / 1000) {
+                crossfadeToNext();
+            }
+        });
+        player.addEventListener("ended", crossfadeToNext);
+    });
+
+    if (historyVideoPlaylist.length === 1) {
+        players[0].loop = true;
+    }
+
+    preparePlayer(players[0], 0);
+    preparePlayer(players[1], historyVideoPlaylist.length > 1 ? 1 : 0);
+    players[0].classList.add("is-active");
+    playVideo(players[0]);
+}
+
 function getSectionIndex(id) {
-    const index = sections.findIndex((section) => section?.id === id);
+    const index = sections.findIndex((section) => section.id === id);
     return index < 0 ? 0 : index;
 }
 
@@ -250,6 +338,7 @@ function goToSection(index) {
     const target = sections[nextIndex];
     if (!target) return;
     isPageMoving = true;
+    setActive(nextIndex);
     target.scrollIntoView({ behavior: "smooth", block: "start" });
     window.setTimeout(() => {
         isPageMoving = false;
@@ -279,10 +368,16 @@ function setupNavigation() {
 
     scrollRoot?.addEventListener("wheel", (event) => {
         const isInsideScrollableWorkText = event.target.closest(".work_focus_body");
-        if (isInsideScrollableWorkText && isInsideScrollableWorkText.scrollHeight > isInsideScrollableWorkText.clientHeight) {
-            return;
+        if (isInsideScrollableWorkText) {
+            const overflowY = window.getComputedStyle(isInsideScrollableWorkText).overflowY;
+            const canScroll = overflowY === "auto" || overflowY === "scroll";
+            const hasRoomBelow = isInsideScrollableWorkText.scrollTop + isInsideScrollableWorkText.clientHeight < isInsideScrollableWorkText.scrollHeight;
+            const hasRoomAbove = isInsideScrollableWorkText.scrollTop > 0;
+            if (canScroll && ((event.deltaY > 0 && hasRoomBelow) || (event.deltaY < 0 && hasRoomAbove))) {
+                return;
+            }
         }
-        if (Math.abs(event.deltaY) < 28 || Math.abs(event.deltaY) < Math.abs(event.deltaX) || isPageMoving) return;
+        if (event.deltaY === 0 || Math.abs(event.deltaY) < Math.abs(event.deltaX) || isPageMoving) return;
 
         event.preventDefault();
         goToSection(activeIndex + (event.deltaY > 0 ? 1 : -1));
@@ -322,6 +417,7 @@ function observeSections() {
 
 renderWorks();
 renderHistory();
+setupHistoryVideoPlaylist();
 setupNavigation();
 observeSections();
 setActive(0);

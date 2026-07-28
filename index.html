@@ -7,8 +7,8 @@
     <meta name="description" content="Minato Okabe portfolio site">
     <link rel="stylesheet" href="css/main.css">
 </head>
-<body id="root">
-    <nav id="global_nav" class="global-nav" aria-label="ページ内メニュー">
+<body>
+    <nav id="global_nav" aria-label="ページ内メニュー">
         <button class="nav-hit-area" type="button" aria-label="メニューを開く"></button>
         <ul class="global_nav_item_top">
             <li class="global_nav_item"><a href="#home" data-jump="home">Home</a></li>
@@ -21,14 +21,16 @@
     <div class="global_section_bar" aria-hidden="true"></div>
 
     <main id="page">
-        <header id="home" class="container header" data-index="0">
-            <h1 class="heading-logo" aria-label="Minato Portfolio">
-                <span>Minato</span>
-                <small>Portfolio</small>
-            </h1>
+        <header id="home" class="container header">
+            <div class="hero_content">
+                <h1 class="heading-logo" aria-label="Minato Portfolio">
+                    <span>Minato</span>
+                    <small>Portfolio</small>
+                </h1>
+            </div>
         </header>
 
-        <section id="about" class="container about" data-index="1">
+        <section id="about" class="container about">
             <div class="about-slanting-background-top" aria-hidden="true"></div>
             <div class="about-slanting-background-bottom" aria-hidden="true"></div>
             <h2 class="section_title"><a href="#about" data-jump="about">About me</a></h2>
@@ -60,7 +62,11 @@
 
         </section>
 
-        <section id="history" class="container history" data-index="2">
+        <section id="history" class="container history">
+            <div class="history_media_slits" aria-hidden="true">
+                <video class="history_slit_video is-active" muted playsinline preload="auto"></video>
+                <video class="history_slit_video" muted playsinline preload="auto"></video>
+            </div>
             <h2 class="section_title"><a href="#history" data-jump="history">History</a></h2>
             <div class="history_wrapper">
                 <div class="history_time_line" aria-hidden="true"></div>
@@ -68,14 +74,14 @@
             </div>
         </section>
 
-        <section id="works" class="container works" data-index="3">
+        <section id="works" class="container works">
             <div class="works_background">
                 <h2 class="section_title"><a href="#works" data-jump="works">Works</a></h2>
                 <div class="works_wrapper" id="works-list"></div>
             </div>
         </section>
 
-        <section id="contact" class="container contact" data-index="4">
+        <section id="contact" class="container contact">
             <h2 class="section_title"><a href="#contact" data-jump="contact">Contact</a></h2>
             <div class="contact_wrapper">
                 <a class="contact_icon_box" href="mailto:om.repository@gmail.com">
