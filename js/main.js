@@ -208,6 +208,23 @@ function renderWorks() {
     carousel.querySelector(".prev").addEventListener("click", () => moveWork(-1));
     carousel.querySelector(".next").addEventListener("click", () => moveWork(1));
 
+    const viewport = carousel.querySelector(".works_viewport");
+    let touchStartX = 0;
+    let touchStartY = 0;
+    viewport.addEventListener("touchstart", (event) => {
+        const touch = event.changedTouches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+    }, { passive: true });
+    viewport.addEventListener("touchend", (event) => {
+        const touch = event.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+        event.preventDefault();
+        moveWork(deltaX < 0 ? 1 : -1);
+    }, { passive: false });
+
     wrapper.appendChild(tabList);
     wrapper.appendChild(intro);
     wrapper.appendChild(carousel);

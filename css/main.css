@@ -569,18 +569,20 @@ a.is-active::after {
 }
 
 .work_focus_media {
+    position: relative;
     min-height: 0;
     background: #f5f5f5;
-    display: grid;
-    place-items: center;
     overflow: hidden;
 }
 
 .work_focus_media img {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
+    object-position: center;
 }
 
 .work_focus_body {
@@ -724,6 +726,8 @@ a.is-active::after {
 @media screen and (max-width: 900px) {
     #page {
         height: 100svh;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
     }
 
     .container {
@@ -739,6 +743,7 @@ a.is-active::after {
         width: min(78vw, 320px);
         height: 100svh;
         transform: translateX(calc(100% - 18px));
+        padding-right: env(safe-area-inset-right);
     }
 
     #global_nav::before {
@@ -784,7 +789,7 @@ a.is-active::after {
 
     .section_title {
         top: 6vh;
-        left: 5vw;
+        left: max(5vw, calc(env(safe-area-inset-left) + 12px));
     }
 
     .section_title a {
@@ -899,6 +904,7 @@ a.is-active::after {
 
     .works_viewport {
         height: min(57svh, 500px);
+        touch-action: pan-y;
     }
 
     .work_focus {
@@ -924,6 +930,32 @@ a.is-active::after {
         max-width: 84vw;
         overflow-wrap: anywhere;
         font-size: clamp(1.2rem, 4vw, 1.6rem);
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    #page {
+        scroll-snap-type: y mandatory;
+    }
+
+    .container {
+        scroll-snap-stop: always;
+    }
+
+    #global_nav:hover,
+    #global_nav:focus-within {
+        transform: translateX(calc(100% - 18px));
+    }
+
+    #global_nav.motion {
+        transform: translateX(0);
+    }
+
+    .nav-hit-area,
+    .work_nav,
+    .works_tab,
+    .contact_icon_box {
+        -webkit-tap-highlight-color: transparent;
     }
 }
 
@@ -1018,4 +1050,180 @@ a.is-active::after {
         font-size: 1rem;
     }
 
+}
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+    .section_title {
+        top: 5svh;
+    }
+
+    .section_title a {
+        font-size: clamp(2.6rem, 5vw, 3.8rem);
+    }
+
+    #global_nav {
+        width: min(48vw, 300px);
+    }
+
+    .global_nav_item_top {
+        padding-top: 7svh;
+    }
+
+    .global_nav_item {
+        margin: 0.4svh 0;
+        padding: 0.7rem 2rem;
+        font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+    }
+
+    .heading-logo span {
+        font-size: clamp(5rem, 12vw, 8rem);
+    }
+
+    .heading-logo small {
+        margin-top: 1.2rem;
+        font-size: clamp(1.3rem, 3vw, 2rem);
+    }
+
+    .about_wrapper {
+        width: 78vw;
+        min-height: 100svh;
+        padding: 13svh 0 5svh;
+        display: flex;
+        align-items: center;
+    }
+
+    .profile_icon {
+        width: min(22vw, 160px);
+        height: min(22vw, 160px);
+        flex: 0 0 auto;
+    }
+
+    .name_circle {
+        top: 50%;
+        left: min(18vw, 138px);
+        width: min(16vw, 120px);
+        height: min(16vw, 120px);
+        transform: translateY(-50%);
+    }
+
+    .about_my_name {
+        min-width: 0;
+        margin: 0 0 0 min(14vw, 108px);
+    }
+
+    .school_info {
+        font-size: clamp(0.95rem, 1.7vw, 1.3rem);
+    }
+
+    .main_name {
+        font-size: clamp(2.8rem, 5vw, 4.4rem);
+    }
+
+    .skill_keywords {
+        padding-top: 6px;
+    }
+
+    .skill_keywords span {
+        padding: 4px 7px;
+        font-size: clamp(0.85rem, 1.35vw, 1rem);
+    }
+
+    .history_wrapper {
+        width: 58vw;
+        margin-right: 12vw;
+        padding: 13svh 0 3svh;
+    }
+
+    .history_time_line {
+        top: 13svh;
+        min-height: calc(100% - 16svh);
+        right: 14vw;
+    }
+
+    .history_object {
+        grid-template-columns: minmax(0, 1fr) 5vw 14vw;
+    }
+
+    .history_text {
+        padding: 0.8svh 1vw 0.8svh 0;
+        font-size: clamp(0.8rem, 1.4vw, 1rem);
+        line-height: 1.3;
+    }
+
+    .history_date {
+        font-size: clamp(0.8rem, 1.4vw, 1rem);
+    }
+
+    .history_circle {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .works_wrapper {
+        width: 86vw;
+        height: 100svh;
+        padding: 12svh 0 2svh;
+    }
+
+    .works_tabs {
+        margin-bottom: 0.3rem;
+    }
+
+    .works_tab {
+        min-height: 28px;
+        font-size: 1rem;
+    }
+
+    .works_intro {
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    .works_viewport {
+        height: 65svh;
+    }
+
+    .work_focus {
+        grid-template-columns: 50% 50%;
+        grid-template-rows: 1fr;
+    }
+
+    .work_focus_body {
+        padding: 1rem;
+    }
+
+    .work_content_name {
+        padding-top: 0.4rem;
+        font-size: 1.5rem;
+    }
+
+    .work_role,
+    .work_contents_text {
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+    }
+
+    .work_details {
+        margin-top: 0.3rem;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .contact_wrapper {
+        width: 72vw;
+        padding-top: 25svh;
+        display: flex;
+        align-items: flex-start;
+        gap: 8vw;
+    }
+
+    .contact_icon {
+        width: 7rem;
+        height: 7rem;
+    }
+
+    .contact_icon_text {
+        margin-top: 0.8rem;
+    }
 }
