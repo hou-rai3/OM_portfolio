@@ -386,7 +386,7 @@ a.is-active::after {
     pointer-events: none;
 }
 
-.history_slit_video {
+.history_slit_image {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -395,10 +395,10 @@ a.is-active::after {
     opacity: 0;
     clip-path: polygon(0 0, 64% 0, 58% 100%, 0 100%);
     filter: saturate(0.78) contrast(1.1) brightness(0.62);
-    transition: opacity var(--history-video-crossfade, 1.2s) ease-in-out;
+    transition: opacity 1.2s ease-in-out;
 }
 
-.history_slit_video.is-active {
+.history_slit_image.is-active {
     opacity: 1;
 }
 
@@ -848,7 +848,7 @@ a.is-active::after {
             rgba(221, 221, 221, 1) 32%);
     }
 
-    .history_slit_video {
+    .history_slit_image {
         clip-path: polygon(0 0, 45% 0, 35% 100%, 0 100%);
     }
 

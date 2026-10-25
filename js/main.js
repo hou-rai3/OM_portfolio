@@ -30,7 +30,7 @@ const works = [
         image: "images/2026-robocon.png",
         url: "https://official-robocon.com/kosen/",
         description: "Aチーム「???」でチームリーダーとしてプロジェクトマネジメントを担当。",
-        details: ["10月11日に近畿地区大会", "11月15日に全国大会", "必勝"],
+        details: ["近畿地区大会準優勝・全国推薦", "11月15日に全国大会", "必勝"],
     },
      {
         title: "DISCO ROBOT CONTEST 2026",
@@ -118,16 +118,8 @@ const histories = [
     { date: "2024年10月", title: "高専ロボコン2024近畿地区大会", text: "準優勝,審査員推薦により全国大会へ" },
     { date: "2024年11月", title: "高専ロボコン2024全国大会", text: "全国優勝" },
     { date: "2026年3月", title: "DISCO ROBOT CONTEST 2026", text: "制御技術賞" },
-    { date: "2026年10月", title: "高専ロボコン", text: "coming soon..." },
+    { date: "2026年10月", title: "高専ロボコン2026近畿地区大会", text: "準優勝・全国推薦" },
 ];
-
-// Add, remove, or reorder paths here to edit the History background playlist.
-const historyVideoPlaylist = [
-    "images/",
-    "images/",
-    "images/",
-];
-const historyVideoCrossfadeMs = 1200;
 
 const scrollRoot = document.getElementById("page");
 const nav = document.getElementById("global_nav");
@@ -265,84 +257,24 @@ function renderHistory() {
     `).join("");
 }
 
-function setupHistoryVideoPlaylist() {
-    const players = Array.from(document.querySelectorAll(".history_slit_video"));
-    if (players.length < 2 || historyVideoPlaylist.length === 0) return;
+async function setupHistorySlideshow() {
+    const images = Array.from(document.querySelectorAll(".history_slit_image"));
+    if (images.length < 2) return;
 
-    document.documentElement.style.setProperty("--history-video-crossfade", `${historyVideoCrossfadeMs}ms`);
-
-    let activePlayerIndex = 0;
-    let activePlaylistIndex = 0;
-    let isCrossfading = false;
-
-    const preparePlayer = (player, playlistIndex) => {
-        player.src = historyVideoPlaylist[playlistIndex];
-        player.dataset.playlistIndex = String(playlistIndex);
-        player.load();
-    };
-
-    const playVideo = (player) => {
-        player.play()?.catch(() => {
-            // Muted autoplay may wait for the first user interaction.
-        });
-    };
-
-    const crossfadeToNext = () => {
-        if (isCrossfading || historyVideoPlaylist.length < 2) return;
-        isCrossfading = true;
-
-        const currentPlayer = players[activePlayerIndex];
-        const nextPlayerIndex = (activePlayerIndex + 1) % players.length;
-        const nextPlayer = players[nextPlayerIndex];
-        const nextPlaylistIndex = (activePlaylistIndex + 1) % historyVideoPlaylist.length;
-
-        if (Number(nextPlayer.dataset.playlistIndex) !== nextPlaylistIndex) {
-            preparePlayer(nextPlayer, nextPlaylistIndex);
-        }
-
-        const revealNext = () => {
-            nextPlayer.currentTime = 0;
-            playVideo(nextPlayer);
-            nextPlayer.classList.add("is-active");
-            currentPlayer.classList.remove("is-active");
-
-            activePlayerIndex = nextPlayerIndex;
-            activePlaylistIndex = nextPlaylistIndex;
-
-            window.setTimeout(() => {
-                currentPlayer.pause();
-                const preloadIndex = (activePlaylistIndex + 1) % historyVideoPlaylist.length;
-                preparePlayer(currentPlayer, preloadIndex);
-                isCrossfading = false;
-            }, historyVideoCrossfadeMs);
-        };
-
-        if (nextPlayer.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            revealNext();
-        } else {
-            nextPlayer.addEventListener("canplay", revealNext, { once: true });
-        }
-    };
-
-    players.forEach((player) => {
-        player.addEventListener("timeupdate", () => {
-            if (player !== players[activePlayerIndex] || !Number.isFinite(player.duration)) return;
-            const remainingSeconds = player.duration - player.currentTime;
-            if (remainingSeconds <= historyVideoCrossfadeMs / 1000) {
-                crossfadeToNext();
-            }
-        });
-        player.addEventListener("ended", crossfadeToNext);
-    });
-
-    if (historyVideoPlaylist.length === 1) {
-        players[0].loop = true;
+    // Start only after both photos are ready to avoid fading into an empty frame.
+    try {
+        await Promise.all(images.map((image) => image.decode()));
+    } catch {
+        return;
     }
 
-    preparePlayer(players[0], 0);
-    preparePlayer(players[1], historyVideoPlaylist.length > 1 ? 1 : 0);
-    players[0].classList.add("is-active");
-    playVideo(players[0]);
+    let activeImageIndex = 0;
+    window.setInterval(() => {
+        if (document.hidden) return;
+        images[activeImageIndex].classList.remove("is-active");
+        activeImageIndex = (activeImageIndex + 1) % images.length;
+        images[activeImageIndex].classList.add("is-active");
+    }, 5000);
 }
 
 function getSectionIndex(id) {
@@ -434,7 +366,7 @@ function observeSections() {
 
 renderWorks();
 renderHistory();
-setupHistoryVideoPlaylist();
+setupHistorySlideshow();
 setupNavigation();
 observeSections();
 setActive(0);
